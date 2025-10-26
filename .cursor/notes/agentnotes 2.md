@@ -48,25 +48,16 @@ This is a lending operating system project starting with the Next.js Shadcn Admi
 
 ## Current Sprint Status
 
-**Sprint 3 - Phase 1: Payments & Draws Backend**: ✅ COMPLETE (October 26, 2025)
-- Complete database schema (5 new tables: payments, draws, inspections, payment_schedules, draw_schedules)
-- Service layer (PaymentService, DrawService, InspectionService)
-- API endpoints (13 new REST routes)
-- Payment schedule generation (amortized & interest-only)
-- Draw approval workflow
-- Budget tracking and reporting
-- All TypeScript build errors resolved
-- Build passing successfully ✅
-- Migration 0006 applied successfully
-
-**Sprint 2C - Loan Builder v2 & Hybrid Model**: ✅ COMPLETE (October 25-26, 2025)
+**Sprint 2C - Loan Builder v2**: ✅ COMPLETE (October 25, 2025)
 - Multi-category loan system (Asset-Backed, Yield Note, Hybrid)
 - Adaptive 8-step wizard with React Hook Form + Zod validation
-- Hybrid relationship model (co-borrowers, syndicated lenders)
-- Junction table tracking with roles and percentages
 - Draft persistence with localStorage auto-save
 - AI forecast infrastructure (heuristic-based ROI/risk)
-- Migration 0004 and 0005 applied successfully
+- Comprehensive type system with discriminated unions
+- Fee management in basis points (BPS)
+- All TypeScript build errors resolved
+- Build passing successfully ✅
+- Dev server running
 
 **Previous**: Sprint 2B - Loan Detail Drawer & Wizard v1 (✅ Complete)
 - Loan detail drawer with 7 tabs
@@ -103,13 +94,10 @@ This is a lending operating system project starting with the Next.js Shadcn Admi
 
 ### Documentation
 - `docs/loan-builder-v2-spec.md` - ⭐ **AUTHORITATIVE v2 SPECIFICATION**
-- `.cursor/notes/sprint3-payments-draws-spec.md` - ⭐ **SPRINT 3 SPECIFICATION**
-- `.cursor/notes/sprint3-phase1-implementation.md` - Phase 1 complete summary
-- `.cursor/notes/sprint3-ui-components-plan.md` - UI component planning
-- `.cursor/notes/SPRINT3-PHASE1-COMPLETE.md` - Achievement summary
-- `.cursor/notes/hybrid-model-implementation.md` - Hybrid relationship model docs
-- `.cursor/notes/v2-implementation-summary.md` - Loan Builder v2 summary
+- `.cursor/notes/v2-implementation-summary.md` - Complete v2 summary
+- `.cursor/notes/READY-FOR-TESTING.md` - Testing guide
 - `.cursor/notes/project_checklist.md` - Sprint progress tracking
+- `.cursor/notes/sprint-2b-summary.md` - Sprint 2B summary
 - `.cursor/docs/aws-s3-setup.md` - AWS S3 configuration
 
 ### Key Components (v2)
@@ -123,48 +111,44 @@ This is a lending operating system project starting with the Next.js Shadcn Admi
 - `src/features/loan-builder/types.ts` - TypeScript types (183 lines)
 - `src/features/loan-builder/store.ts` - Zustand store (166 lines)
 
-### Services (v2 Enhanced + Sprint 3)
-- `src/services/loan.service.ts` - v2 loan operations + hybrid model
-- `src/services/collateral.service.ts` - Collateral CRUD
-- `src/services/loan-terms.service.ts` - Extended terms CRUD
-- `src/services/payment.service.ts` - ⭐ NEW: Payment tracking & schedules (310 lines)
-- `src/services/draw.service.ts` - ⭐ NEW: Draw workflow management (280 lines)
-- `src/services/inspection.service.ts` - ⭐ NEW: Inspection tracking (310 lines)
-- `src/lib/ai/forecast.ts` - AI forecast engine (166 lines)
+### Services (v2 Enhanced)
+- `src/services/loan.service.ts` - v2 loan operations
+- `src/services/collateral.service.ts` - NEW: Collateral CRUD
+- `src/services/loan-terms.service.ts` - NEW: Extended terms CRUD
+- `src/lib/ai/forecast.ts` - NEW: AI forecast engine (166 lines)
 
-### API Endpoints (v2 + Sprint 3)
+### API Endpoints (v2)
 - `POST /api/v1/loans/v2` - v2 loan creation
 - `POST /api/v1/analytics/forecast` - AI forecast
 - `POST /api/v1/uploads/sign` - S3 signed URLs
-- ⭐ **Payment endpoints** (7 routes) - Payment tracking
-- ⭐ **Draw endpoints** (6 routes) - Draw management
-- ⭐ **Inspection endpoints** (5 routes) - Inspection workflow
 
 ## Next Session Priorities
 
-1. **Begin Sprint 3 Phase 2** (Payment Management UI):
-   - Build PaymentHistoryTable component
-   - Build PaymentEntryForm component
-   - Build BalanceSummaryCards component
-   - Add payment tab to loan drawer
-   - Test payment creation workflow
+1. **Apply Database Migration** (CRITICAL):
+   ```bash
+   npm run db:migrate
+   ```
+   - Review: `src/db/migrations/0004_loan_builder_v2.sql`
+   - Verify all columns/tables created
+   - Run seed script to populate v2 fields
 
-2. **Sprint 3 Phase 3** (Draw Management UI):
-   - Build DrawRequestWizard component
-   - Build DrawTimelineTracker component
-   - Build BudgetVsActualChart component
-   - Build DrawApprovalDashboard page
+2. **Test Loan Builder v2**:
+   - Test asset-backed loan creation (full workflow)
+   - Test yield note creation (investor agreement)
+   - Test hybrid loan creation (flexible)
+   - Test draft save/resume functionality
+   - Verify all 3 categories work end-to-end
+   - Check validation error handling
 
-3. **Sprint 3 Phase 4** (Mobile Inspector):
-   - Set up PWA infrastructure
-   - Build InspectionForm component
-   - Implement PhotoCapture with camera API
-   - Build OfflineSync functionality
-
-4. **Configure AWS S3** (Deferred):
+3. **Configure AWS S3** (Deferred):
    - Add credentials to .env.local
    - Test property photo uploads
    - Test document uploads
+
+4. **Sprint 3 Preparation**:
+   - Plan payments and draws tables
+   - Design payment processing workflow
+   - Architect mobile inspector app (PWA)
 
 ## Known Technical Debt
 - User attribution hardcoded (needs session integration)

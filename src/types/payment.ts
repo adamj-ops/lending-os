@@ -1,0 +1,221 @@
+/**
+ * Payment Type System for Lending OS
+ * Comprehensive types for payment tracking and processing
+ */
+
+// ============ ENUMS ============
+
+export enum PaymentType {
+  PRINCIPAL = "principal",
+  INTEREST = "interest",
+  FEE = "fee",
+  COMBINED = "combined",
+}
+
+export enum PaymentMethod {
+  WIRE = "wire",
+  ACH = "ach",
+  CHECK = "check",
+  CASH = "cash",
+  OTHER = "other",
+}
+
+export enum PaymentStatus {
+  PENDING = "pending",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}
+
+export enum ScheduleType {
+  AMORTIZED = "amortized",
+  INTEREST_ONLY = "interest_only",
+  BALLOON = "balloon",
+}
+
+// ============ BASE TYPES ============
+
+export interface Payment {
+  id: string;
+  loanId: string;
+  
+  // Payment Details
+  paymentType: PaymentType;
+  amount: string; // Stored as string for precision
+  principalAmount: string | null;
+  interestAmount: string | null;
+  feeAmount: string | null;
+  
+  // Payment Method & Status
+  paymentMethod: PaymentMethod;
+  status: PaymentStatus;
+  
+  // Transaction Tracking
+  transactionReference: string | null;
+  bankReference: string | null;
+  checkNumber: string | null;
+  
+  // Timing (Drizzle date fields return strings)
+  paymentDate: string;
+  receivedDate: string | null;
+  processedDate: Date | null;
+  
+  // Metadata
+  notes: string | null;
+  createdBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaymentSchedule {
+  id: string;
+  loanId: string;
+  
+  // Schedule Details
+  scheduleType: ScheduleType;
+  paymentFrequency: string;
+  
+  // Schedule Data
+  totalPayments: number;
+  paymentAmount: string;
+  scheduleData: PaymentScheduleItem[];
+  
+  // Status
+  isActive: boolean;
+  generatedAt: Date;
+  generatedBy: string | null;
+}
+
+export interface PaymentScheduleItem {
+  paymentNumber: number;
+  dueDate: string; // ISO date string
+  principalAmount: string;
+  interestAmount: string;
+  totalAmount: string;
+  remainingBalance: string;
+}
+
+// ============ DTO TYPES ============
+
+export interface CreatePaymentDTO {
+  loanId: string;
+  paymentType: PaymentType;
+  amount: number;
+  principalAmount?: number;
+  interestAmount?: number;
+  feeAmount?: number;
+  paymentMethod: PaymentMethod;
+  paymentDate: string | Date;
+  transactionReference?: string;
+  bankReference?: string;
+  checkNumber?: string;
+  notes?: string;
+  createdBy?: string;
+}
+
+export interface UpdatePaymentDTO {
+  status?: PaymentStatus;
+  receivedDate?: string | Date;
+  processedDate?: string | Date;
+  bankReference?: string;
+  notes?: string;
+}
+
+export interface PaymentFilters {
+  status?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  page?: number;
+  limit?: number;
+}
+
+// ============ RESPONSE TYPES ============
+
+export interface PaymentHistory {
+  payments: Payment[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  summary: PaymentSummary;
+}
+
+export interface PaymentSummary {
+  totalPaid: string;
+  principalPaid: string;
+  interestPaid: string;
+  feesPaid: string;
+  paymentsCount: number;
+  lastPaymentDate: string | null; // Date field from DB returns string
+}
+
+export interface LoanBalance {
+  currentPrincipal: string;
+  interestAccrued: string;
+  totalBalance: string;
+  nextPaymentDue: string;
+  nextPaymentDate: Date | null;
+  asOfDate: Date;
+}
+
+export interface BalanceImpact {
+  beforeBalance: string;
+  afterBalance: string;
+  principalReduction: string;
+  interestReduction: string;
+  totalReduction: string;
+}
+
+export interface PaymentCalculation {
+  paymentNumber: number;
+  dueDate: Date;
+  principalAmount: number;
+  interestAmount: number;
+  totalAmount: number;
+  remainingBalance: number;
+}
+
+export interface BalanceReport {
+  loanId: string;
+  startDate: Date;
+  endDate: Date;
+  openingBalance: string;
+  totalPayments: string;
+  principalPaid: string;
+  interestPaid: string;
+  feesPaid: string;
+  closingBalance: string;
+  paymentsCount: number;
+}
+
+export interface PaymentProjection {
+  month: number;
+  date: Date;
+  payment: number;
+  principal: number;
+  interest: number;
+  balance: number;
+}
+
+// ============ VALIDATION TYPES ============
+
+export interface PaymentValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+// ============ WITH RELATIONS ============
+
+export interface PaymentWithLoan extends Payment {
+  loan?: {
+    id: string;
+    principal: string;
+    rate: string;
+    termMonths: number;
+  };
+}
+

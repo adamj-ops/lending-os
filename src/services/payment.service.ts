@@ -1,0 +1,542 @@
+import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
+import { db } from "@/db/client";
+import { payments, paymentSchedules, loans } from "@/db/schema";
+import type {
+  Payment,
+  CreatePaymentDTO,
+  UpdatePaymentDTO,
+  PaymentFilters,
+  PaymentHistory,
+  PaymentSummary,
+  LoanBalance,
+  BalanceImpact,
+  PaymentSchedule,
+  PaymentCalculation,
+  BalanceReport,
+  PaymentProjection,
+} from "@/types/payment";
+import { PaymentStatus } from "@/types/payment";
+
+export class PaymentService {
+  // ============ CRUD OPERATIONS ============
+
+  /**
+   * Create a new payment
+   */
+  static async createPayment(data: CreatePaymentDTO): Promise<Payment> {
+    const [payment] = await db
+      .insert(payments)
+      .values({
+        loanId: data.loanId,
+        paymentType: data.paymentType,
+        amount: data.amount.toString(),
+        principalAmount: data.principalAmount?.toString() || "0",
+        interestAmount: data.interestAmount?.toString() || "0",
+        feeAmount: data.feeAmount?.toString() || "0",
+        paymentMethod: data.paymentMethod,
+        paymentDate: new Date(data.paymentDate).toISOString().split('T')[0],
+        transactionReference: data.transactionReference || null,
+        bankReference: data.bankReference || null,
+        checkNumber: data.checkNumber || null,
+        notes: data.notes || null,
+        createdBy: data.createdBy || null,
+        status: "pending",
+      })
+      .returning();
+
+    return payment as Payment;
+  }
+
+  /**
+   * Get payment by ID
+   */
+  static async getPayment(id: string): Promise<Payment | null> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, id));
+
+    return payment ? (payment as Payment) : null;
+  }
+
+  /**
+   * Update payment
+   */
+  static async updatePayment(
+    id: string,
+    data: UpdatePaymentDTO
+  ): Promise<Payment> {
+    const [payment] = await db
+      .update(payments)
+      .set({
+        status: data.status,
+        receivedDate: data.receivedDate ? new Date(data.receivedDate).toISOString().split('T')[0] : undefined,
+        processedDate: data.processedDate ? new Date(data.processedDate) : undefined,
+        bankReference: data.bankReference,
+        notes: data.notes,
+        updatedAt: new Date(),
+      })
+      .where(eq(payments.id, id))
+      .returning();
+
+    return payment as Payment;
+  }
+
+  /**
+   * Delete payment
+   */
+  static async deletePayment(id: string): Promise<boolean> {
+    await db.delete(payments).where(eq(payments.id, id));
+    return true;
+  }
+
+  // ============ LOAN-SPECIFIC OPERATIONS ============
+
+  /**
+   * Get all payments for a loan with filters
+   */
+  static async getLoanPayments(
+    loanId: string,
+    filters?: PaymentFilters
+  ): Promise<Payment[]> {
+    let query = db.select().from(payments).where(eq(payments.loanId, loanId));
+
+    // Apply filters
+    const conditions = [eq(payments.loanId, loanId)];
+
+    if (filters?.status) {
+      conditions.push(eq(payments.status, filters.status));
+    }
+
+    if (filters?.paymentMethod) {
+      conditions.push(eq(payments.paymentMethod, filters.paymentMethod));
+    }
+
+    if (filters?.startDate) {
+      conditions.push(gte(payments.paymentDate, new Date(filters.startDate).toISOString().split('T')[0]));
+    }
+
+    if (filters?.endDate) {
+      conditions.push(lte(payments.paymentDate, new Date(filters.endDate).toISOString().split('T')[0]));
+    }
+
+    const result = await db
+      .select()
+      .from(payments)
+      .where(and(...conditions))
+      .orderBy(desc(payments.paymentDate));
+
+    return result as Payment[];
+  }
+
+  /**
+   * Get payment history with pagination and summary
+   */
+  static async getPaymentHistory(
+    loanId: string,
+    filters?: PaymentFilters
+  ): Promise<PaymentHistory> {
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 20;
+    const offset = (page - 1) * limit;
+
+    // Get payments with pagination
+    const allPayments = await this.getLoanPayments(loanId, filters);
+    const paginatedPayments = allPayments.slice(offset, offset + limit);
+
+    // Calculate summary
+    const summary = await this.getPaymentSummary(loanId);
+
+    return {
+      payments: paginatedPayments,
+      pagination: {
+        page,
+        limit,
+        total: allPayments.length,
+        totalPages: Math.ceil(allPayments.length / limit),
+      },
+      summary,
+    };
+  }
+
+  /**
+   * Get payment summary for a loan
+   */
+  static async getPaymentSummary(loanId: string): Promise<PaymentSummary> {
+    const loanPayments = await db
+      .select()
+      .from(payments)
+      .where(
+        and(eq(payments.loanId, loanId), eq(payments.status, PaymentStatus.COMPLETED))
+      );
+
+    const totalPaid = loanPayments.reduce(
+      (sum, p) => sum + parseFloat(p.amount || "0"),
+      0
+    );
+    const principalPaid = loanPayments.reduce(
+      (sum, p) => sum + parseFloat(p.principalAmount || "0"),
+      0
+    );
+    const interestPaid = loanPayments.reduce(
+      (sum, p) => sum + parseFloat(p.interestAmount || "0"),
+      0
+    );
+    const feesPaid = loanPayments.reduce(
+      (sum, p) => sum + parseFloat(p.feeAmount || "0"),
+      0
+    );
+
+    const lastPayment = loanPayments.length > 0 ? loanPayments[loanPayments.length - 1] : null;
+
+    return {
+      totalPaid: totalPaid.toFixed(2),
+      principalPaid: principalPaid.toFixed(2),
+      interestPaid: interestPaid.toFixed(2),
+      feesPaid: feesPaid.toFixed(2),
+      paymentsCount: loanPayments.length,
+      lastPaymentDate: lastPayment?.paymentDate || null,
+    };
+  }
+
+  // ============ PAYMENT PROCESSING ============
+
+  /**
+   * Process a payment (mark as completed)
+   */
+  static async processPayment(paymentId: string): Promise<Payment> {
+    return this.updatePayment(paymentId, {
+      status: PaymentStatus.COMPLETED,
+      processedDate: new Date(),
+    });
+  }
+
+  /**
+   * Reverse a payment
+   */
+  static async reversePayment(
+    paymentId: string,
+    reason: string
+  ): Promise<Payment> {
+    return this.updatePayment(paymentId, {
+      status: PaymentStatus.CANCELLED,
+      notes: `Payment reversed: ${reason}`,
+    });
+  }
+
+  // ============ BALANCE CALCULATIONS ============
+
+  /**
+   * Calculate current loan balance
+   */
+  static async calculateLoanBalance(
+    loanId: string,
+    asOfDate?: Date
+  ): Promise<LoanBalance> {
+    // Get loan details
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+
+    if (!loan) {
+      throw new Error("Loan not found");
+    }
+
+    const principal = parseFloat(loan.principal || "0");
+    const rate = parseFloat(loan.rate || "0");
+
+    // Get all completed payments up to asOfDate
+    const paymentConditions = [
+      eq(payments.loanId, loanId),
+      eq(payments.status, PaymentStatus.COMPLETED),
+    ];
+
+    if (asOfDate) {
+      paymentConditions.push(lte(payments.paymentDate, asOfDate.toISOString().split('T')[0]));
+    }
+
+    const completedPayments = await db
+      .select()
+      .from(payments)
+      .where(and(...paymentConditions));
+
+    // Calculate principal paid
+    const principalPaid = completedPayments.reduce(
+      (sum, p) => sum + parseFloat(p.principalAmount || "0"),
+      0
+    );
+
+    // Calculate current principal
+    const currentPrincipal = principal - principalPaid;
+
+    // Calculate interest accrued
+    const interestAccrued = await this.calculateInterestAccrued(loanId, asOfDate);
+
+    // Total balance
+    const totalBalance = currentPrincipal + interestAccrued;
+
+    // Calculate next payment (this is a simplified calculation)
+    const monthlyRate = rate / 12 / 100;
+    const nextPayment =
+      loan.paymentType === "interest_only"
+        ? currentPrincipal * monthlyRate
+        : (currentPrincipal * monthlyRate * Math.pow(1 + monthlyRate, loan.termMonths)) /
+          (Math.pow(1 + monthlyRate, loan.termMonths) - 1);
+
+    return {
+      currentPrincipal: currentPrincipal.toFixed(2),
+      interestAccrued: interestAccrued.toFixed(2),
+      totalBalance: totalBalance.toFixed(2),
+      nextPaymentDue: nextPayment.toFixed(2),
+      nextPaymentDate: null, // Would need schedule to determine
+      asOfDate: asOfDate || new Date(),
+    };
+  }
+
+  /**
+   * Calculate interest accrued
+   */
+  static async calculateInterestAccrued(
+    loanId: string,
+    asOfDate?: Date
+  ): Promise<number> {
+    // This is a simplified calculation
+    // In production, you'd want to calculate daily interest based on actual days
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+
+    if (!loan) {
+      return 0;
+    }
+
+    const balance = await this.calculateLoanBalance(loanId, asOfDate);
+    const principal = parseFloat(balance.currentPrincipal);
+    const rate = parseFloat(loan.rate || "0");
+
+    // Simple monthly interest calculation
+    const monthlyInterest = (principal * rate) / 12 / 100;
+
+    return monthlyInterest;
+  }
+
+  /**
+   * Calculate payment impact on balance
+   */
+  static async calculatePaymentImpact(
+    loanId: string,
+    payment: { principalAmount: number; interestAmount: number }
+  ): Promise<BalanceImpact> {
+    const beforeBalance = await this.calculateLoanBalance(loanId);
+
+    const principalReduction = payment.principalAmount;
+    const interestReduction = payment.interestAmount;
+    const totalReduction = principalReduction + interestReduction;
+
+    const afterPrincipal = parseFloat(beforeBalance.currentPrincipal) - principalReduction;
+    const afterInterest = parseFloat(beforeBalance.interestAccrued) - interestReduction;
+    const afterBalance = afterPrincipal + afterInterest;
+
+    return {
+      beforeBalance: beforeBalance.totalBalance,
+      afterBalance: afterBalance.toFixed(2),
+      principalReduction: principalReduction.toFixed(2),
+      interestReduction: interestReduction.toFixed(2),
+      totalReduction: totalReduction.toFixed(2),
+    };
+  }
+
+  // ============ SCHEDULE GENERATION ============
+
+  /**
+   * Generate payment schedule for a loan
+   */
+  static async generatePaymentSchedule(loanId: string): Promise<PaymentSchedule> {
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+
+    if (!loan) {
+      throw new Error("Loan not found");
+    }
+
+    const principal = parseFloat(loan.principal || "0");
+    const annualRate = parseFloat(loan.rate || "0");
+    const termMonths = loan.termMonths;
+    const paymentType = loan.paymentType || "amortized";
+    const paymentFrequency = loan.paymentFrequency || "monthly";
+
+    const schedule = this.calculateAmortizationSchedule(
+      principal,
+      annualRate,
+      termMonths,
+      paymentType
+    );
+
+    // Save schedule to database
+    const [savedSchedule] = await db
+      .insert(paymentSchedules)
+      .values({
+        loanId,
+        scheduleType: paymentType === "amortized" ? "amortized" : "interest_only",
+        paymentFrequency,
+        totalPayments: termMonths.toString(),
+        paymentAmount: schedule[0]?.totalAmount.toString() || "0",
+        scheduleData: JSON.stringify(schedule),
+        isActive: "1",
+      })
+      .returning();
+
+    // Convert PaymentCalculation[] to PaymentScheduleItem[]
+    const scheduleItems = schedule.map((item) => ({
+      paymentNumber: item.paymentNumber,
+      dueDate: item.dueDate.toISOString().split('T')[0],
+      principalAmount: item.principalAmount.toFixed(2),
+      interestAmount: item.interestAmount.toFixed(2),
+      totalAmount: item.totalAmount.toFixed(2),
+      remainingBalance: item.remainingBalance.toFixed(2),
+    }));
+
+    return {
+      id: savedSchedule.id,
+      loanId: savedSchedule.loanId,
+      scheduleType: savedSchedule.scheduleType as any,
+      paymentFrequency: savedSchedule.paymentFrequency,
+      totalPayments: parseInt(savedSchedule.totalPayments || "0"),
+      paymentAmount: savedSchedule.paymentAmount || "0",
+      scheduleData: scheduleItems,
+      isActive: savedSchedule.isActive === "1",
+      generatedAt: savedSchedule.generatedAt,
+      generatedBy: savedSchedule.generatedBy,
+    };
+  }
+
+  /**
+   * Calculate amortization schedule
+   */
+  private static calculateAmortizationSchedule(
+    principal: number,
+    annualRate: number,
+    termMonths: number,
+    paymentType: string
+  ): PaymentCalculation[] {
+    const monthlyRate = annualRate / 12 / 100;
+    const schedule: PaymentCalculation[] = [];
+
+    let remainingBalance = principal;
+
+    for (let month = 1; month <= termMonths; month++) {
+      const interestPayment = remainingBalance * monthlyRate;
+
+      let principalPayment: number;
+      if (paymentType === "interest_only") {
+        principalPayment = month === termMonths ? remainingBalance : 0;
+      } else {
+        // Amortized
+        const totalPayment =
+          (principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+          (Math.pow(1 + monthlyRate, termMonths) - 1);
+        principalPayment = totalPayment - interestPayment;
+      }
+
+      remainingBalance -= principalPayment;
+
+      const dueDate = new Date();
+      dueDate.setMonth(dueDate.getMonth() + month);
+
+      schedule.push({
+        paymentNumber: month,
+        dueDate,
+        principalAmount: principalPayment,
+        interestAmount: interestPayment,
+        totalAmount: principalPayment + interestPayment,
+        remainingBalance: Math.max(0, remainingBalance),
+      });
+    }
+
+    return schedule;
+  }
+
+  /**
+   * Update payment schedule
+   */
+  static async updatePaymentSchedule(loanId: string): Promise<PaymentSchedule> {
+    // Deactivate old schedules
+    await db
+      .update(paymentSchedules)
+      .set({ isActive: "0" })
+      .where(eq(paymentSchedules.loanId, loanId));
+
+    // Generate new schedule
+    return this.generatePaymentSchedule(loanId);
+  }
+
+  // ============ REPORTING ============
+
+  /**
+   * Generate balance report for a period
+   */
+  static async generateBalanceReport(
+    loanId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<BalanceReport> {
+    const openingBalance = await this.calculateLoanBalance(loanId, startDate);
+    const closingBalance = await this.calculateLoanBalance(loanId, endDate);
+
+    const periodPayments = await db
+      .select()
+      .from(payments)
+      .where(
+        and(
+          eq(payments.loanId, loanId),
+          eq(payments.status, PaymentStatus.COMPLETED),
+          gte(payments.paymentDate, startDate.toISOString().split('T')[0]),
+          lte(payments.paymentDate, endDate.toISOString().split('T')[0])
+        )
+      );
+
+    const totalPayments = periodPayments.reduce(
+      (sum, p) => sum + parseFloat(p.amount || "0"),
+      0
+    );
+    const principalPaid = periodPayments.reduce(
+      (sum, p) => sum + parseFloat(p.principalAmount || "0"),
+      0
+    );
+    const interestPaid = periodPayments.reduce(
+      (sum, p) => sum + parseFloat(p.interestAmount || "0"),
+      0
+    );
+    const feesPaid = periodPayments.reduce(
+      (sum, p) => sum + parseFloat(p.feeAmount || "0"),
+      0
+    );
+
+    return {
+      loanId,
+      startDate,
+      endDate,
+      openingBalance: openingBalance.totalBalance,
+      totalPayments: totalPayments.toFixed(2),
+      principalPaid: principalPaid.toFixed(2),
+      interestPaid: interestPaid.toFixed(2),
+      feesPaid: feesPaid.toFixed(2),
+      closingBalance: closingBalance.totalBalance,
+      paymentsCount: periodPayments.length,
+    };
+  }
+
+  /**
+   * Generate payment projection
+   */
+  static async generatePaymentProjection(
+    loanId: string,
+    months: number
+  ): Promise<PaymentProjection[]> {
+    const schedule = await this.generatePaymentSchedule(loanId);
+    return schedule.scheduleData.slice(0, months).map((item) => ({
+      month: item.paymentNumber,
+      date: new Date(item.dueDate),
+      payment: parseFloat(item.totalAmount),
+      principal: parseFloat(item.principalAmount),
+      interest: parseFloat(item.interestAmount),
+      balance: parseFloat(item.remainingBalance),
+    }));
+  }
+}
+

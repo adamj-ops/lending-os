@@ -8,10 +8,10 @@ import { BorrowerRole } from "@/types/loan";
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { loanId: string } }
+  { params }: { params: Promise<{ loanId: string }> }
 ) {
   try {
-    const { loanId } = params;
+    const { loanId } = await params;
     const body = await request.json();
 
     const { borrowerId, role } = body;
@@ -64,10 +64,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { loanId: string } }
+  { params }: { params: Promise<{ loanId: string }> }
 ) {
   try {
-    const { loanId } = params;
+    const { loanId } = await params;
 
     const borrowers = await LoanService.getLoanBorrowers(loanId);
 

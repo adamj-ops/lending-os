@@ -7,10 +7,10 @@ import { LoanService } from "@/services/loan.service";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { loanId: string } }
+  { params }: { params: Promise<{ loanId: string }> }
 ) {
   try {
-    const { loanId } = params;
+    const { loanId } = await params;
 
     // Fetch all borrowers and lenders in parallel
     const [borrowers, lenders] = await Promise.all([

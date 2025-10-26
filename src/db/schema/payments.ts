@@ -1,0 +1,126 @@
+import { pgTable, uuid, numeric, text, date, timestamp, index, pgEnum } from "drizzle-orm/pg-core";
+import { loans, paymentFrequencyEnum } from "./loans";
+import { users } from "./users";
+
+/**
+ * Payment Method Enum
+ * - wire: Wire transfer
+ * - ach: ACH transfer
+ * - check: Physical check
+ * - cash: Cash payment
+ * - other: Other payment method
+ */
+export const paymentMethodEnum = pgEnum("payment_method_enum", [
+  "wire",
+  "ach",
+  "check",
+  "cash",
+  "other",
+]);
+
+/**
+ * Payment Status Enum
+ * - pending: Payment initiated but not yet processed
+ * - completed: Payment successfully processed
+ * - failed: Payment failed
+ * - cancelled: Payment cancelled
+ */
+export const paymentStatusEnum = pgEnum("payment_status_enum", [
+  "pending",
+  "completed",
+  "failed",
+  "cancelled",
+]);
+
+/**
+ * Payments Table
+ * Tracks all loan payments including principal, interest, and fees
+ */
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    loanId: uuid("loan_id")
+      .notNull()
+      .references(() => loans.id, { onDelete: "cascade" }),
+
+    // Payment Details
+    paymentType: text("payment_type").notNull(), // 'principal', 'interest', 'fee', 'combined'
+    amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+    principalAmount: numeric("principal_amount", { precision: 14, scale: 2 }).default("0"),
+    interestAmount: numeric("interest_amount", { precision: 14, scale: 2 }).default("0"),
+    feeAmount: numeric("fee_amount", { precision: 14, scale: 2 }).default("0"),
+
+    // Payment Method & Status
+    paymentMethod: paymentMethodEnum("payment_method").notNull(),
+    status: paymentStatusEnum("status").default("pending"),
+
+    // Transaction Tracking
+    transactionReference: text("transaction_reference"),
+    bankReference: text("bank_reference"),
+    checkNumber: text("check_number"),
+
+    // Timing
+    paymentDate: date("payment_date").notNull(),
+    receivedDate: date("received_date"),
+    processedDate: timestamp("processed_date", { withTimezone: true }),
+
+    // Metadata
+    notes: text("notes"),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    // Indexes for performance
+    loanIdIdx: index("payments_loan_id_idx").on(table.loanId),
+    paymentDateIdx: index("payments_payment_date_idx").on(table.paymentDate),
+    statusIdx: index("payments_status_idx").on(table.status),
+    paymentMethodIdx: index("payments_payment_method_idx").on(table.paymentMethod),
+  })
+);
+
+/**
+ * Schedule Type Enum
+ * - amortized: Payments include both principal and interest
+ * - interest_only: Payments are interest only
+ * - balloon: Regular payments with final balloon payment
+ */
+export const scheduleTypeEnum = pgEnum("schedule_type_enum", [
+  "amortized",
+  "interest_only",
+  "balloon",
+]);
+
+/**
+ * Payment Schedules Table
+ * Stores generated payment schedules for loans
+ */
+export const paymentSchedules = pgTable(
+  "payment_schedules",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    loanId: uuid("loan_id")
+      .notNull()
+      .references(() => loans.id, { onDelete: "cascade" }),
+
+    // Schedule Details
+    scheduleType: scheduleTypeEnum("schedule_type").notNull(),
+    paymentFrequency: paymentFrequencyEnum("payment_frequency").notNull(),
+
+    // Schedule Data
+    totalPayments: numeric("total_payments").notNull(),
+    paymentAmount: numeric("payment_amount", { precision: 14, scale: 2 }).notNull(),
+    scheduleData: text("schedule_data").notNull(), // JSONB stored as text for Drizzle compatibility
+
+    // Status
+    isActive: numeric("is_active").default("1"), // 1 = true, 0 = false (boolean as numeric)
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow().notNull(),
+    generatedBy: uuid("generated_by").references(() => users.id),
+  },
+  (table) => ({
+    loanIdIdx: index("payment_schedules_loan_id_idx").on(table.loanId),
+    isActiveIdx: index("payment_schedules_is_active_idx").on(table.isActive),
+  })
+);
+

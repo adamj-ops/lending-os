@@ -8,4 +8,6 @@ export * from "./loans";
 export * from "./loan_documents";
 export * from "./loan_notes";
 export * from "./relationships";
+export * from "./payments";
+export * from "./draws";
 

@@ -8,10 +8,10 @@ import { LenderRole } from "@/types/loan";
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { loanId: string } }
+  { params }: { params: Promise<{ loanId: string }> }
 ) {
   try {
-    const { loanId } = params;
+    const { loanId } = await params;
     const body = await request.json();
 
     const { lenderId, percentage } = body;
@@ -67,10 +67,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { loanId: string } }
+  { params }: { params: Promise<{ loanId: string }> }
 ) {
   try {
-    const { loanId } = params;
+    const { loanId } = await params;
 
     const lenders = await LoanService.getLoanLenders(loanId);
 

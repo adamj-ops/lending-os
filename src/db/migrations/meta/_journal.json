@@ -43,6 +43,13 @@
       "when": 1761442781182,
       "tag": "0005_fix_hybrid_relations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761504612912,
+      "tag": "0006_sprint3_payments_draws",
+      "breakpoints": true
     }
   ]
 }

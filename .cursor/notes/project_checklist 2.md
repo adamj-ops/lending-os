@@ -158,40 +158,16 @@ Starting with the Next.js Shadcn Admin Dashboard template as the foundation for 
 - [x] Update LoanStatus enum (removed ACTIVE, PAID_OFF; added REJECTED)
 - [x] Update loan state machine
 - [x] Fix all backward compatibility issues
-- [x] Apply database migration (0004_loan_builder_v2.sql)
-- [x] Apply database migration (0005_fix_hybrid_relations.sql)
-- [x] Test hybrid relationship model API endpoints
-- [x] Verify Loan Builder v2 works with all 3 categories
-- [x] Fix Next.js 16 async params pattern in new API routes
-- [x] Build passes successfully ✅
+- [ ] Apply database migration (0004_loan_builder_v2.sql)
+- [ ] End-to-end testing (in progress)
 
-## Sprint 3 - Payments & Draws (🔨 Phase 1 Complete)
-- [x] Create comprehensive technical specification document
-- [x] Design payments and draws database schema
-- [x] Design draw workflow and inspection tracking schema
-- [x] Architecture design for PaymentService, DrawService, and LoanBalanceService
-- [x] Define API endpoints for payments and draws with request/response schemas
-- [x] Plan UI components for payment history, draw requests, and mobile inspector
-- [x] Create payments table (migration 0006)
-- [x] Create draws table (migration 0006)
-- [x] Create inspections table (migration 0006)
-- [x] Create payment_schedules table (migration 0006)
-- [x] Create draw_schedules table (migration 0006)
-- [x] Implement PaymentService with balance calculations
-- [x] Implement DrawService with workflow management
-- [x] Implement InspectionService with photo tracking
-- [x] Create payment API endpoints (7 routes)
-- [x] Create draw API endpoints (3 routes)
-- [x] Create inspection API endpoints (3 routes)
-- [x] Build passes successfully ✅
-- [ ] Build payment history UI (Phase 2)
-- [ ] Build payment entry form (Phase 2)
-- [ ] Build balance summary cards (Phase 2)
-- [ ] Build draw request wizard (Phase 3)
-- [ ] Build draw timeline tracker (Phase 3)
-- [ ] Build budget charts (Phase 3)
-- [ ] Build draw approval dashboard (Phase 3)
-- [ ] Build mobile inspector UI (PWA) (Phase 4)
+## Sprint 3 - Payments & Draws (Planned)
+- [ ] Create payments table
+- [ ] Create draws table
+- [ ] Implement payment processing
+- [ ] Build payment history UI
+- [ ] Create draw workflow
+- [ ] Build mobile inspector UI (PWA)
 
 ## Sprint 4 - Analytics & Dashboard (Planned)
 - [ ] Create portfolio snapshots job
