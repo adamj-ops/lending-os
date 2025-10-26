@@ -25,7 +25,7 @@ This directory contains detailed sprint summaries documenting the evolution of L
 
 | Sprint | Focus | Timeline | Status |
 |--------|-------|----------|--------|
-| **Sprint 4** | Event Bus & Fund Domain Foundation | 2 weeks | 📅 Planned |
+| **Sprint 4** | Event Bus & Domain Migration | 2 weeks | 📋 **Planning Complete** |
 | **Sprint 5** | Domain Migration & Event Handlers | 2 weeks | 📅 Planned |
 | **Sprint 6** | Compliance Domain & Automation | 2 weeks | 📅 Planned |
 | **Sprint 7** | Mobile Inspector App (PWA) | 2 weeks | 📅 Planned |
@@ -106,22 +106,35 @@ This directory contains detailed sprint summaries documenting the evolution of L
 
 ---
 
-### Sprint 4: Event Bus & Fund Domain Foundation (Planned)
+### Sprint 4: Event Bus & Domain Migration
 **Timeline**: 2 weeks (Est. Start: Nov 2025)
-**Focus**: Event-driven architecture foundation
+**Status**: 📋 **Planning Complete - Ready to Start**
+**Focus**: Event-driven architecture foundation & domain-centric migration
 
-**Planned Deliverables**:
-- Event bus implementation (`lib/eventBus.ts`)
+**Deliverables**:
+
+**Week 1: Event Infrastructure**
+- Event bus implementation (`lib/events/eventBus.ts`)
 - `domain_events` table for event sourcing
-- Event publishing in existing services (logging only)
-- Fund domain schema design
-- Investor management foundation
-- Domain rules documentation
+- Event handler registry and subscription system
+- Update services to publish events
+- Loan domain migration (actions.ts, schema.ts)
+
+**Week 2: UI Components & Integration**
+- Payment UI components (entry form, history, schedule)
+- Draw UI components (request form, approval workflow, timeline)
+- Nested domain structure (loans/payments/, loans/draws/)
+- API v2 foundation
+- Full integration and testing
 
 **Goals**:
+- Event bus operational with handler execution
+- Payment schedule auto-generates on loan funding
+- All payment and draw features have proper UI
 - Zero breaking changes to existing functionality
-- Events logged for all major state changes
 - Clear domain boundaries established
+
+[📄 Full Sprint 4 Plan](./sprint-4-plan.md)
 
 ---
 
