@@ -13,10 +13,5 @@ export interface ForecastOutput {
   efficiency: number;
   recommendedFunding?: "bank" | "escrow" | "internal";
   riskLevel?: "low" | "medium" | "high";
-  aiInsights?: {
-    riskFactors: string[];
-    recommendations: string[];
-    confidence: number;
-  };
 }
 

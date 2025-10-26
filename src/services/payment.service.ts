@@ -1,21 +1,21 @@
-import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { payments, paymentSchedules, loans } from "@/db/schema";
-import type {
-  Payment,
-  CreatePaymentDTO,
-  UpdatePaymentDTO,
-  PaymentFilters,
-  PaymentHistory,
-  PaymentSummary,
-  LoanBalance,
-  BalanceImpact,
-  PaymentSchedule,
-  PaymentCalculation,
-  BalanceReport,
-  PaymentProjection,
+import {
+  type Payment,
+  type CreatePaymentDTO,
+  type UpdatePaymentDTO,
+  type PaymentFilters,
+  type PaymentHistory,
+  type PaymentSummary,
+  type LoanBalance,
+  type BalanceImpact,
+  type PaymentSchedule,
+  type PaymentCalculation,
+  type BalanceReport,
+  type PaymentProjection,
+  PaymentStatus,
 } from "@/types/payment";
-import { PaymentStatus } from "@/types/payment";
 
 export class PaymentService {
   // ============ CRUD OPERATIONS ============

@@ -1,20 +1,20 @@
 import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { draws, inspections, drawSchedules, loans } from "@/db/schema";
-import type {
-  Draw,
-  CreateDrawDTO,
-  UpdateDrawDTO,
-  ApproveDrawDTO,
-  RejectDrawDTO,
-  DisburseDrawDTO,
-  DrawFilters,
-  DrawHistory,
-  DrawSummary,
-  BudgetStatus,
-  BudgetLineItem,
+import { draws, drawSchedules, loans } from "@/db/schema";
+import {
+  type Draw,
+  type CreateDrawDTO,
+  type UpdateDrawDTO,
+  type ApproveDrawDTO,
+  type RejectDrawDTO,
+  type DisburseDrawDTO,
+  type DrawFilters,
+  type DrawHistory,
+  type DrawSummary,
+  type BudgetStatus,
+  type BudgetLineItem,
+  DrawStatus,
 } from "@/types/draw";
-import { DrawStatus } from "@/types/draw";
 
 export class DrawService {
   // ============ CRUD OPERATIONS ============

@@ -13,6 +13,12 @@ const nextConfig = {
       },
     ];
   },
+  // Vercel optimizations
+  serverExternalPackages: ['@neondatabase/serverless'],
+  // Environment variables for Vercel
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
 }
 
 export default nextConfig

@@ -50,6 +50,42 @@ For a lending operating system, we'll need to focus on:
 - Husky for git hooks
 - Tailwind CSS for styling
 
+## Sprint 3 Phase 1 Key Learnings (October 26, 2025)
+
+### Drizzle Date Field Handling
+- Date fields (`date()` type) return strings in `YYYY-MM-DD` format, not Date objects
+- Always convert to string format: `new Date().toISOString().split('T')[0]`
+- Update TypeScript types to reflect this: `paymentDate: string` not `Date`
+- Timestamp fields (`timestamp()`) do return Date objects
+
+### Enum Naming Conflicts
+- Avoid duplicate enum names across schema files
+- Use descriptive names to prevent conflicts (e.g., `paymentTransactionTypeEnum` vs `paymentTypeEnum`)
+- Or use text fields with validation instead of enums for flexibility
+
+### Migration Management
+- Delete migration files carefully - must also update `meta/_journal.json`
+- Remove orphaned entries from journal or migrations will fail
+- Use `drizzle-kit generate --name custom_name` for readable migration names
+
+### Service Layer Patterns
+- CRUD operations first, then specialized methods
+- Group methods by functionality (payments, schedules, balance, reporting)
+- Use private helper methods for complex calculations
+- Return properly typed objects, not raw DB results
+
+### API Endpoint Structure
+- Follow Next.js 16 async params pattern: `{ params: Promise<{ id: string }> }`
+- Always await params before use: `const { id } = await params;`
+- Group related endpoints by resource hierarchy
+- Use consistent error handling and response format
+
+### JSONB Storage
+- Store as text in Drizzle: `photos: text("photos")`
+- Serialize/deserialize in service layer: `JSON.stringify()` / `JSON.parse()`
+- Initialize with empty arrays: `JSON.stringify([])`
+- Type arrays properly: `PhotoData[]` not `any`
+
 ## Sprint 2B Key Learnings (October 25, 2025)
 
 ### Next.js 16 Migration Patterns
@@ -81,6 +117,66 @@ For a lending operating system, we'll need to focus on:
 - Created `SimpleDataTable` wrapper for simpler usage
 - Prefer SimpleDataTable for standard CRUD lists
 - Use full DataTable with useDataTableInstance for advanced features (DnD, etc)
+
+## Architectural Evolution (October 26, 2025)
+
+### From Route-Centric to Domain-Centric
+
+LendingOS is evolving from a **route-centric colocation** pattern to a **domain-driven colocation** architecture.
+
+**Before (v1)**:
+- Routes organized by workflow (applications, approvals, payments)
+- UI components colocated with routes
+- Services centralized in `src/services/`
+- Cross-domain logic scattered
+
+**Now (v2 - Transitioning)**:
+- Domains organized by business capability (Loan, Borrower, Fund, Payment, Compliance)
+- Each domain owns UI + API + data + logic (vertical slices)
+- Event-driven communication between domains
+- Clear domain boundaries
+
+### Key Architectural Decisions
+
+1. **Domain Colocation**: UI, actions, schemas, and data logic live together per domain
+2. **Event Bus**: Cross-domain communication via events instead of direct service calls
+3. **API Versioning**: v1 (current) will coexist with v2 (domain-centric) during migration
+4. **Gradual Migration**: No breaking changes; domains migrated incrementally
+5. **Event Sourcing**: All domain events stored for auditability and analytics
+
+### The Five Domains
+
+1. **Loan Domain**: Loan lifecycle, collateral, documents (Sprint 1-3 Complete)
+2. **Payment Domain**: Payment processing, schedules, reconciliation (Sprint 3 Complete)
+3. **Borrower Domain**: CRM, KYC verification, relationships (Sprint 2 Complete)
+4. **Fund Domain**: Investor management, capital deployment (Planned - Sprint 4+)
+5. **Compliance Domain**: Regulatory filings, document automation (Planned - Sprint 5+)
+
+### Migration Strategy
+
+- **Sprint 4**: Implement event bus, establish domain rules
+- **Sprint 5**: Migrate existing domains to new structure
+- **Sprint 6**: Enable event handlers and automation
+- **Sprint 7-8**: Add Fund and Compliance domains
+- **Sprint 9**: Deprecate v1 API, cleanup
+
+### Documentation Structure
+
+New centralized documentation:
+```
+.cursor/
+├── docs/
+│   ├── architecture/      # v2 architecture, events, migration
+│   ├── domains/           # Per-domain documentation
+│   ├── technical/         # Database, API, tech stack
+│   └── sprints/           # Sprint summaries
+├── notes/
+│   └── session-notes/     # Dated session files
+└── rules/
+    └── domain-rules.md    # Development guidelines
+```
+
+---
 
 ## Interesting Findings
 
