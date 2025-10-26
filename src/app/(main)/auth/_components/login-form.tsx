@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +19,9 @@ const FormSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -27,13 +32,40 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    toast("You submitted the following values", {
-      description: (
-        <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error("Login failed", {
+          description: result.error || "Invalid email or password",
+        });
+        return;
+      }
+
+      toast.success("Login successful", {
+        description: "Redirecting to dashboard...",
+      });
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (error) {
+      toast.error("Login failed", {
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -90,8 +122,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Login
+        <Button className="w-full" type="submit" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>

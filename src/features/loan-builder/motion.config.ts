@@ -1,0 +1,93 @@
+/**
+ * Shared motion constants for Loan Builder wizard
+ * Ensures consistent animation language across all steps
+ */
+
+export const motionPresets = {
+  // Spring physics for natural movement
+  spring: {
+    type: "spring" as const,
+    stiffness: 250,
+    damping: 22,
+    mass: 0.9,
+  },
+
+  // Fade in from bottom (step transitions)
+  fadeInUp: {
+    initial: { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -12 },
+    transition: { duration: 0.25, ease: "easeOut" as const },
+  },
+
+  // Fade + scale (dialog, cards)
+  fadeInScale: {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+    transition: { duration: 0.25, ease: "easeInOut" as const },
+  },
+
+  // Slide from right (progress)
+  slideInRight: {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 },
+    transition: { duration: 0.3, ease: "easeOut" as const },
+  },
+
+  // Stagger children (review cards)
+  staggerContainer: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+        delayChildren: 0.1,
+      },
+    },
+  },
+
+  staggerItem: {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  },
+
+  // Success pulse
+  successPulse: {
+    initial: { scale: 0.6, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    transition: {
+      type: "spring" as const,
+      stiffness: 400,
+      damping: 20,
+    },
+  },
+
+  // Input focus
+  inputFocus: {
+    scale: 1.01,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 20,
+    },
+  },
+
+  // Progress bar
+  progressBar: {
+    initial: { scaleX: 0, originX: 0 },
+    animate: { scaleX: 1 },
+    transition: { duration: 0.4, ease: "easeOut" as const },
+  },
+};
+
+/**
+ * Tailwind classes for animated components
+ */
+export const animatedClasses = {
+  input: "transition-all duration-200",
+  card: "transition-all duration-300 hover:shadow-lg",
+  button: "transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
+};
+

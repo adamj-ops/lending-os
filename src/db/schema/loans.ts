@@ -1,0 +1,110 @@
+import { pgTable, text, timestamp, uuid, numeric, integer, pgEnum, boolean, jsonb } from "drizzle-orm/pg-core";
+import { organizations } from "./organizations";
+import { borrowers } from "./borrowers";
+import { lenders } from "./lenders";
+import { properties } from "./properties";
+
+// Loan category determines the workflow and requirements
+export const loanCategoryEnum = pgEnum("loan_category", [
+  "asset_backed",
+  "yield_note",
+  "hybrid",
+]);
+
+export const loanStatusEnum = pgEnum("loan_status", [
+  "draft",
+  "submitted",
+  "verification",
+  "underwriting",
+  "approved",
+  "closing",
+  "funded",
+  "rejected",
+]);
+
+export const paymentTypeEnum = pgEnum("payment_type", [
+  "interest_only",
+  "amortized",
+]);
+
+export const paymentFrequencyEnum = pgEnum("payment_frequency", [
+  "monthly",
+  "quarterly",
+  "maturity",
+]);
+
+export const loans = pgTable("loans", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  
+  // Loan category determines workflow (v2 feature)
+  loanCategory: loanCategoryEnum("loan_category").notNull().default("asset_backed"),
+  
+  // Foreign keys to related entities (nullable for different loan types)
+  borrowerId: uuid("borrower_id").references(() => borrowers.id, { onDelete: "set null" }),
+  lenderId: uuid("lender_id").references(() => lenders.id, { onDelete: "set null" }),
+  propertyId: uuid("property_id").references(() => properties.id, { onDelete: "set null" }),
+  
+  // Core loan details (renamed for v2)
+  propertyAddress: text("property_address"), // Optional for yield_note
+  principal: numeric("principal", { precision: 14, scale: 2 }).notNull(),
+  rate: numeric("rate", { precision: 6, scale: 3 }).notNull(),
+  termMonths: integer("term_months").notNull(),
+  
+  // Payment structure (v2 additions)
+  paymentType: paymentTypeEnum("payment_type").notNull().default("amortized"),
+  paymentFrequency: paymentFrequencyEnum("payment_frequency").notNull().default("monthly"),
+  
+  // Fees in basis points (v2 additions)
+  originationFeeBps: integer("origination_fee_bps").default(0),
+  lateFeeBps: integer("late_fee_bps").default(0),
+  defaultInterestBps: integer("default_interest_bps").default(0),
+  
+  // Additional features (v2 additions)
+  escrowEnabled: boolean("escrow_enabled").default(false),
+  
+  // Status tracking
+  status: loanStatusEnum("status").notNull().default("draft"),
+  statusChangedAt: timestamp("status_changed_at", { withTimezone: true }).defaultNow().notNull(),
+  
+  // Backward compatibility fields (kept for migration)
+  loanAmount: numeric("loan_amount", { precision: 15, scale: 2 }), // Deprecated: use principal
+  interestRate: numeric("interest_rate", { precision: 5, scale: 2 }), // Deprecated: use rate
+  
+  // Audit fields
+  createdBy: uuid("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  
+  // Dates
+  fundedDate: timestamp("funded_date", { withTimezone: true }),
+  maturityDate: timestamp("maturity_date", { withTimezone: true }),
+});
+
+// Extended loan terms (v2 addition)
+export const loanTerms = pgTable("loan_terms", {
+  loanId: uuid("loan_id")
+    .primaryKey()
+    .references(() => loans.id, { onDelete: "cascade" }),
+  amortizationMonths: integer("amortization_months"),
+  compounding: text("compounding"), // 'simple' | 'compound'
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Collateral tracking (v2 addition)
+export const collateral = pgTable("collateral", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  loanId: uuid("loan_id")
+    .notNull()
+    .references(() => loans.id, { onDelete: "cascade" }),
+  lienPosition: text("lien_position"), // '1st' | '2nd' | 'subordinate'
+  description: text("description"),
+  drawSchedule: jsonb("draw_schedule").$type<Array<{ n: number; amount: number; note?: string }>>(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+

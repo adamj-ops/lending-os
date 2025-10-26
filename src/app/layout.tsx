@@ -1,17 +1,23 @@
 import { ReactNode } from "react";
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import "@fontsource/open-sans/300.css";
+import "@fontsource/open-sans/400.css";
+import "@fontsource/open-sans/500.css";
+import "@fontsource/open-sans/600.css";
+import "@fontsource/open-sans/700.css";
+import "@fontsource/geist-mono/400.css";
+import "@fontsource/geist-mono/500.css";
+import "@fontsource/geist-mono/600.css";
 
 import { Toaster } from "@/components/ui/sonner";
 import { APP_CONFIG } from "@/config/app-config";
 import { getPreference } from "@/server/server-actions";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
+import { ReactQueryProvider } from "@/providers/query-client-provider";
 import { THEME_MODE_VALUES, THEME_PRESET_VALUES, type ThemePreset, type ThemeMode } from "@/types/preferences/theme";
 
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: APP_CONFIG.meta.title,
@@ -29,11 +35,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       data-theme-preset={themePreset}
       suppressHydrationWarning
     >
-      <body className={`${inter.className} min-h-screen antialiased`}>
-        <PreferencesStoreProvider themeMode={themeMode} themePreset={themePreset}>
-          {children}
-          <Toaster />
-        </PreferencesStoreProvider>
+      <body className="min-h-screen antialiased">
+        <ReactQueryProvider>
+          <PreferencesStoreProvider themeMode={themeMode} themePreset={themePreset}>
+            {children}
+            <Toaster />
+          </PreferencesStoreProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

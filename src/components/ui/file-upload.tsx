@@ -1,0 +1,271 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { Upload, X, File, Image as ImageIcon } from "lucide-react";
+import { Button } from "./button";
+import { Progress } from "./progress";
+import { cn } from "@/lib/utils";
+
+export interface UploadedFile {
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  key: string;
+}
+
+interface FileUploadProps {
+  onUpload: (files: UploadedFile[]) => void;
+  maxFiles?: number;
+  maxSize?: number; // in MB
+  acceptedTypes?: string[];
+  folder?: string;
+  className?: string;
+}
+
+export function FileUpload({
+  onUpload,
+  maxFiles = 5,
+  maxSize = 10,
+  acceptedTypes = ["image/*", "application/pdf", ".doc", ".docx"],
+  folder = "uploads",
+  className,
+}: FileUploadProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<
+    Array<{ name: string; progress: number }>
+  >([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const uploadFile = async (file: File) => {
+    try {
+      // Get presigned URL
+      const response = await fetch("/api/v1/uploads/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          folder,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to get upload URL");
+
+      const { data } = await response.json();
+      const { uploadUrl, publicUrl, fileKey } = data;
+
+      // Upload file to S3
+      setUploadingFiles((prev) => [...prev, { name: file.name, progress: 0 }]);
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          setUploadingFiles((prev) =>
+            prev.map((f) => (f.name === file.name ? { ...f, progress } : f))
+          );
+        }
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            resolve();
+          } else {
+            reject(new Error("Upload failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
+      });
+
+      // Remove from uploading and add to uploaded
+      setUploadingFiles((prev) => prev.filter((f) => f.name !== file.name));
+
+      const uploadedFile: UploadedFile = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: publicUrl,
+        key: fileKey,
+      };
+
+      setUploadedFiles((prev) => {
+        const newFiles = [...prev, uploadedFile];
+        onUpload(newFiles);
+        return newFiles;
+      });
+    } catch (err) {
+      setUploadingFiles((prev) => prev.filter((f) => f.name !== file.name));
+      setError(`Failed to upload ${file.name}`);
+      console.error("Upload error:", err);
+    }
+  };
+
+  const handleFiles = useCallback(
+    (files: FileList | null) => {
+      if (!files) return;
+
+      setError(null);
+
+      const fileArray = Array.from(files);
+
+      // Validate number of files
+      if (uploadedFiles.length + fileArray.length > maxFiles) {
+        setError(`Maximum ${maxFiles} files allowed`);
+        return;
+      }
+
+      // Validate file sizes and types
+      for (const file of fileArray) {
+        if (file.size > maxSize * 1024 * 1024) {
+          setError(`File ${file.name} exceeds ${maxSize}MB limit`);
+          return;
+        }
+
+        const isAccepted = acceptedTypes.some((type) => {
+          if (type.endsWith("/*")) {
+            return file.type.startsWith(type.replace("/*", ""));
+          }
+          return file.type === type || file.name.endsWith(type);
+        });
+
+        if (!isAccepted) {
+          setError(`File type not accepted: ${file.name}`);
+          return;
+        }
+      }
+
+      // Upload files
+      fileArray.forEach(uploadFile);
+    },
+    [uploadedFiles.length, maxFiles, maxSize, acceptedTypes]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      handleFiles(e.dataTransfer.files);
+    },
+    [handleFiles]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      onUpload(newFiles);
+      return newFiles;
+    });
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  return (
+    <div className={cn("space-y-4", className)}>
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={cn(
+          "rounded-lg border-2 border-dashed p-8 text-center transition-colors",
+          isDragging
+            ? "border-primary bg-primary/5"
+            : "border-muted-foreground/25 hover:border-primary/50"
+        )}
+      >
+        <Upload className="mx-auto mb-4 size-12 text-muted-foreground" />
+        <p className="mb-2 text-sm font-medium">
+          Drop files here or click to browse
+        </p>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Maximum {maxFiles} files, up to {maxSize}MB each
+        </p>
+        <input
+          type="file"
+          multiple
+          accept={acceptedTypes.join(",")}
+          onChange={(e) => handleFiles(e.target.files)}
+          className="hidden"
+          id="file-upload"
+        />
+        <Button asChild variant="outline" size="sm">
+          <label htmlFor="file-upload" className="cursor-pointer">
+            Choose Files
+          </label>
+        </Button>
+      </div>
+
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      {uploadingFiles.length > 0 && (
+        <div className="space-y-2">
+          {uploadingFiles.map((file) => (
+            <div key={file.name} className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="truncate">{file.name}</span>
+                <span className="text-muted-foreground">{file.progress}%</span>
+              </div>
+              <Progress value={file.progress} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {uploadedFiles.length > 0 && (
+        <div className="space-y-2">
+          {uploadedFiles.map((file, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 rounded-md border p-3"
+            >
+              {file.type.startsWith("image/") ? (
+                <ImageIcon className="size-8 text-muted-foreground" />
+              ) : (
+                <File className="size-8 text-muted-foreground" />
+              )}
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate text-sm font-medium">{file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatFileSize(file.size)}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removeFile(index)}
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+

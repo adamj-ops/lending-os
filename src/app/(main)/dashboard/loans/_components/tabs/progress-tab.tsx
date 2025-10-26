@@ -1,0 +1,178 @@
+"use client";
+
+import { useMemo } from "react";
+import { TrendingUp, Calendar, DollarSign, Percent } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import type { LoanWithRelations } from "@/types/loan";
+
+interface ProgressTabProps {
+  loan: LoanWithRelations;
+}
+
+export function ProgressTab({ loan }: ProgressTabProps) {
+  const loanMetrics = useMemo(() => {
+    const loanAmount = Number(loan.loanAmount);
+    const interestRate = Number(loan.interestRate) / 100;
+    const termMonths = loan.termMonths;
+
+    // Calculate monthly payment using amortization formula
+    const monthlyRate = interestRate / 12;
+    const monthlyPayment =
+      (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+      (Math.pow(1 + monthlyRate, termMonths) - 1);
+
+    // Calculate total payment and interest
+    const totalPayment = monthlyPayment * termMonths;
+    const totalInterest = totalPayment - loanAmount;
+
+    // For now, showing 0% paid (will integrate with payments in Sprint 3)
+    const amountPaid = 0;
+    const percentagePaid = 0;
+    const remainingBalance = loanAmount;
+
+    // Calculate days remaining
+    let daysRemaining = null;
+    if (loan.maturityDate) {
+      const today = new Date();
+      const maturity = new Date(loan.maturityDate);
+      const timeDiff = maturity.getTime() - today.getTime();
+      daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    }
+
+    return {
+      monthlyPayment,
+      totalPayment,
+      totalInterest,
+      amountPaid,
+      percentagePaid,
+      remainingBalance,
+      daysRemaining,
+    };
+  }, [loan]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Repayment Progress</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium">Principal Repaid</span>
+              <span className="text-sm text-muted-foreground">
+                {loanMetrics.percentagePaid.toFixed(1)}%
+              </span>
+            </div>
+            <Progress value={loanMetrics.percentagePaid} className="h-3" />
+            <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {formatCurrency(loanMetrics.amountPaid)} of{" "}
+                {formatCurrency(Number(loan.loanAmount))}
+              </span>
+              <span>
+                {formatCurrency(loanMetrics.remainingBalance)} remaining
+              </span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="size-4 text-muted-foreground" />
+                <p className="text-sm font-medium text-muted-foreground">
+                  Monthly Payment
+                </p>
+              </div>
+              <p className="mt-2 text-2xl font-bold">
+                {formatCurrency(loanMetrics.monthlyPayment)}
+              </p>
+            </div>
+
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="size-4 text-muted-foreground" />
+                <p className="text-sm font-medium text-muted-foreground">
+                  Days to Maturity
+                </p>
+              </div>
+              <p className="mt-2 text-2xl font-bold">
+                {loanMetrics.daysRemaining !== null
+                  ? loanMetrics.daysRemaining > 0
+                    ? loanMetrics.daysRemaining
+                    : "Matured"
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Loan Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Original Principal
+            </p>
+            <p className="mt-1 text-lg font-semibold">
+              {formatCurrency(Number(loan.loanAmount))}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Total Interest
+            </p>
+            <p className="mt-1 text-lg font-semibold">
+              {formatCurrency(loanMetrics.totalInterest)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Total to be Paid
+            </p>
+            <p className="mt-1 text-lg font-semibold">
+              {formatCurrency(loanMetrics.totalPayment)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Number of Payments
+            </p>
+            <p className="mt-1 text-lg font-semibold">{loan.termMonths}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex h-32 flex-col items-center justify-center">
+            <TrendingUp className="mb-2 size-12 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Payment tracking will be available in Sprint 3
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+

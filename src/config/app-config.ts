@@ -3,12 +3,12 @@ import packageJson from "../../package.json";
 const currentYear = new Date().getFullYear();
 
 export const APP_CONFIG = {
-  name: "Studio Admin",
+  name: "Lending OS",
   version: packageJson.version,
-  copyright: `© ${currentYear}, Studio Admin.`,
+  copyright: `© ${currentYear}, Lending OS.`,
   meta: {
-    title: "Studio Admin - Modern Next.js Dashboard Starter Template",
+    title: "Lending OS - Modern Loan Management Platform",
     description:
-      "Studio Admin is a modern, open-source dashboard starter template built with Next.js 16, Tailwind CSS v4, and shadcn/ui. Perfect for SaaS apps, admin panels, and internal tools—fully customizable and production-ready.",
+      "Lending OS is a next-generation loan management platform for private and hard-money lenders. Manage the full loan lifecycle—from origination to payoff—with a modern, intuitive interface built on Next.js 16, Drizzle ORM, and Shadcn UI.",
   },
 };

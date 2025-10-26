@@ -1,0 +1,183 @@
+import { eq, and } from "drizzle-orm";
+import { db } from "@/db/client";
+import { borrowerLoans, lenderLoans, loans, borrowers, lenders } from "@/db/schema";
+
+export class RelationshipService {
+  /**
+   * Link a borrower to a loan
+   */
+  static async linkBorrowerToLoan(borrowerId: string, loanId: string) {
+    const [relationship] = await db
+      .insert(borrowerLoans)
+      .values({
+        borrowerId,
+        loanId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    return relationship;
+  }
+
+  /**
+   * Unlink a borrower from a loan
+   */
+  static async unlinkBorrowerFromLoan(borrowerId: string, loanId: string) {
+    await db
+      .delete(borrowerLoans)
+      .where(and(eq(borrowerLoans.borrowerId, borrowerId), eq(borrowerLoans.loanId, loanId)));
+
+    return true;
+  }
+
+  /**
+   * Get all loans for a borrower
+   */
+  static async getBorrowerLoans(borrowerId: string) {
+    const result = await db
+      .select({
+        loan: loans,
+      })
+      .from(borrowerLoans)
+      .innerJoin(loans, eq(borrowerLoans.loanId, loans.id))
+      .where(eq(borrowerLoans.borrowerId, borrowerId));
+
+    return result.map((r) => r.loan);
+  }
+
+  /**
+   * Get all borrowers for a loan
+   */
+  static async getLoanBorrowers(loanId: string) {
+    const result = await db
+      .select({
+        borrower: borrowers,
+      })
+      .from(borrowerLoans)
+      .innerJoin(borrowers, eq(borrowerLoans.borrowerId, borrowers.id))
+      .where(eq(borrowerLoans.loanId, loanId));
+
+    return result.map((r) => r.borrower);
+  }
+
+  /**
+   * Link a lender to a loan
+   */
+  static async linkLenderToLoan(lenderId: string, loanId: string) {
+    const [relationship] = await db
+      .insert(lenderLoans)
+      .values({
+        lenderId,
+        loanId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    return relationship;
+  }
+
+  /**
+   * Unlink a lender from a loan
+   */
+  static async unlinkLenderFromLoan(lenderId: string, loanId: string) {
+    await db
+      .delete(lenderLoans)
+      .where(and(eq(lenderLoans.lenderId, lenderId), eq(lenderLoans.loanId, loanId)));
+
+    return true;
+  }
+
+  /**
+   * Get all loans for a lender
+   */
+  static async getLenderLoans(lenderId: string) {
+    const result = await db
+      .select({
+        loan: loans,
+      })
+      .from(lenderLoans)
+      .innerJoin(loans, eq(lenderLoans.loanId, loans.id))
+      .where(eq(lenderLoans.lenderId, lenderId));
+
+    return result.map((r) => r.loan);
+  }
+
+  /**
+   * Get all lenders for a loan
+   */
+  static async getLoanLenders(loanId: string) {
+    const result = await db
+      .select({
+        lender: lenders,
+      })
+      .from(lenderLoans)
+      .innerJoin(lenders, eq(lenderLoans.lenderId, lenders.id))
+      .where(eq(lenderLoans.loanId, loanId));
+
+    return result.map((r) => r.lender);
+  }
+
+  /**
+   * Sync borrower loans (replace all relationships)
+   */
+  static async syncBorrowerLoans(borrowerId: string, loanIds: string[]) {
+    // Delete all existing relationships
+    await db.delete(borrowerLoans).where(eq(borrowerLoans.borrowerId, borrowerId));
+
+    // Insert new relationships
+    if (loanIds.length > 0) {
+      await db.insert(borrowerLoans).values(
+        loanIds.map((loanId) => ({
+          borrowerId,
+          loanId,
+        }))
+      );
+    }
+
+    return true;
+  }
+
+  /**
+   * Sync lender loans (replace all relationships)
+   */
+  static async syncLenderLoans(lenderId: string, loanIds: string[]) {
+    // Delete all existing relationships
+    await db.delete(lenderLoans).where(eq(lenderLoans.lenderId, lenderId));
+
+    // Insert new relationships
+    if (loanIds.length > 0) {
+      await db.insert(lenderLoans).values(
+        loanIds.map((loanId) => ({
+          lenderId,
+          loanId,
+        }))
+      );
+    }
+
+    return true;
+  }
+
+  /**
+   * Get loan count for a borrower
+   */
+  static async getBorrowerLoanCount(borrowerId: string): Promise<number> {
+    const result = await db
+      .select()
+      .from(borrowerLoans)
+      .where(eq(borrowerLoans.borrowerId, borrowerId));
+
+    return result.length;
+  }
+
+  /**
+   * Get loan count for a lender
+   */
+  static async getLenderLoanCount(lenderId: string): Promise<number> {
+    const result = await db
+      .select()
+      .from(lenderLoans)
+      .where(eq(lenderLoans.lenderId, lenderId));
+
+    return result.length;
+  }
+}

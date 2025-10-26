@@ -1,0 +1,182 @@
+import type { UploadedFile } from "@/components/ui/file-upload";
+
+// ============ LOAN CATEGORIES ============
+
+export type LoanCategory = "asset_backed" | "yield_note" | "hybrid";
+
+export type BorrowerType = "individual" | "entity";
+
+export type LenderType = "individual" | "fund" | "ira" | "company";
+
+export type InvestmentType =
+  | "fixed_yield"
+  | "revenue_share"
+  | "profit_participation"
+  | "custom";
+
+export type PaymentType = "interest_only" | "amortized";
+
+export type PaymentFrequency = "monthly" | "quarterly" | "maturity";
+
+export type LienPosition = "1st" | "2nd" | "subordinate";
+
+export type FundingSource = "bank" | "escrow" | "internal";
+
+// ============ FORM DATA STRUCTURES ============
+
+export interface BorrowerFormData {
+  id?: string; // Existing borrower ID
+  type: BorrowerType;
+  // Individual fields
+  firstName?: string;
+  lastName?: string;
+  // Entity fields
+  name?: string;
+  // Common fields
+  email: string;
+  phone?: string;
+  address?: string;
+  creditScore?: number;
+  taxId?: string; // Will be encrypted before storage
+}
+
+export interface LenderFormData {
+  id?: string; // Existing lender ID
+  name: string;
+  type: LenderType;
+  contactEmail: string;
+  contactPhone?: string;
+}
+
+export interface PropertyFormData {
+  id?: string; // Existing property ID
+  address: string;
+  city: string;
+  state: string;
+  zip?: string;
+  propertyType: "single_family" | "multi_family" | "commercial" | "land";
+  occupancy?: "owner_occupied" | "tenant_occupied" | "vacant";
+  estimatedValue?: number;
+  purchasePrice: number;
+  appraisedValue?: number;
+  appraisalDate?: string; // ISO date
+  rehabBudget?: number;
+  photos?: Array<{ key: string; url?: string }>;
+}
+
+export interface InvestmentFormData {
+  investmentType: InvestmentType;
+  committedAmount: number;
+  returnRate: number;
+  compounding: "simple" | "compound";
+  startDate: string; // ISO date
+  maturityDate: string; // ISO date
+  paymentFrequency: PaymentFrequency;
+}
+
+export interface LoanTermsFormData {
+  principal: number;
+  rate: number;
+  termMonths: number;
+  paymentType: PaymentType;
+  paymentFrequency: PaymentFrequency;
+  originationFeeBps?: number;
+  lateFeeBps?: number;
+  defaultInterestBps?: number;
+  escrowEnabled?: boolean;
+}
+
+export interface DrawScheduleItem {
+  n: number; // Draw number
+  amount: number;
+  note?: string;
+}
+
+export interface CollateralFormData {
+  lienPosition?: LienPosition;
+  description?: string;
+  drawSchedule?: DrawScheduleItem[];
+}
+
+export interface ParticipationSplit {
+  lenderId: string;
+  lenderName?: string;
+  percentage: number;
+  amount: number;
+}
+
+export interface FundingStructureFormData {
+  fundingSource?: FundingSource;
+  participationSplits?: ParticipationSplit[];
+  escrowBalance?: number;
+}
+
+// ============ COMPLETE FORM DATA ============
+
+export interface AssetBackedFormData {
+  loanCategory: "asset_backed";
+  borrower: BorrowerFormData;
+  property: PropertyFormData;
+  terms: LoanTermsFormData;
+  documents?: UploadedFile[];
+  collateral?: CollateralFormData;
+  funding?: FundingStructureFormData;
+}
+
+export interface YieldNoteFormData {
+  loanCategory: "yield_note";
+  lender: LenderFormData;
+  investment: InvestmentFormData;
+  terms: LoanTermsFormData;
+  documents?: UploadedFile[];
+  funding?: FundingStructureFormData;
+}
+
+export interface HybridFormData {
+  loanCategory: "hybrid";
+  borrower?: BorrowerFormData;
+  lender?: LenderFormData;
+  property?: PropertyFormData;
+  investment?: InvestmentFormData;
+  terms: LoanTermsFormData;
+  documents?: UploadedFile[];
+  collateral?: CollateralFormData;
+  funding?: FundingStructureFormData;
+  capitalPoolId?: string;
+  targetYieldMin?: number;
+  targetYieldMax?: number;
+}
+
+export type CreateLoanFormData =
+  | AssetBackedFormData
+  | YieldNoteFormData
+  | HybridFormData;
+
+// ============ AI FORECAST (Phase 4) ============
+
+export interface ForecastInput {
+  principal: number;
+  rate: number;
+  termMonths: number;
+  category: LoanCategory;
+  borrowerCreditScore?: number;
+  loanToValue?: number;
+}
+
+export interface ForecastOutput {
+  roiPct: number; // Projected return on investment
+  defaultProb: number; // Probability of default (0-1)
+  efficiency: number; // Yield efficiency score (0-100)
+  recommendedFunding?: FundingSource;
+  riskLevel?: "low" | "medium" | "high";
+}
+
+// ============ WIZARD STATE ============
+
+export interface WizardDraft {
+  id: string;
+  formData: Partial<CreateLoanFormData>;
+  currentStep: number;
+  lastSaved: string; // ISO timestamp
+}
+

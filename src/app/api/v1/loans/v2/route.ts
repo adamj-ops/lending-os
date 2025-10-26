@@ -1,0 +1,225 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db/client";
+import { loans, borrowers, lenders, properties, loanTerms, collateral, loanDocuments, borrowerLoans, lenderLoans } from "@/db/schema";
+import { CreateLoanSchema } from "@/features/loan-builder/schemas";
+import { LoanDocumentType } from "@/types/loan-document";
+import { BorrowerRole, LenderRole } from "@/types/loan";
+
+/**
+ * POST /api/v1/loans/v2
+ * Create loan using Loan Builder v2 schema
+ * Supports: asset_backed, yield_note, hybrid
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate with Zod
+    const validation = CreateLoanSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation failed",
+          details: validation.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = validation.data;
+
+    // TODO: Get from session
+    const organizationId = "550e8400-e29b-41d4-a716-446655440000";
+    const createdBy = "550e8400-e29b-41d4-a716-446655440000";
+
+    // ============ CREATE ENTITIES BASED ON CATEGORY ============
+
+    let borrowerId: string | null = null;
+    let lenderId: string | null = null;
+    let propertyId: string | null = null;
+
+    // Create/link borrower (asset_backed, hybrid)
+    if (data.borrower) {
+      if (data.borrower.id) {
+        borrowerId = data.borrower.id;
+      } else {
+        const [newBorrower] = await db
+          .insert(borrowers)
+          .values({
+            organizationId,
+            type: data.borrower.type,
+            firstName: data.borrower.firstName || null,
+            lastName: data.borrower.lastName || null,
+            name: data.borrower.name || null,
+            email: data.borrower.email,
+            phone: data.borrower.phone || null,
+            address: data.borrower.address || null,
+            creditScore: data.borrower.creditScore || null,
+            taxIdEncrypted: data.borrower.taxId || null, // TODO: Encrypt
+          })
+          .returning();
+        borrowerId = newBorrower.id;
+      }
+    }
+
+    // Create/link lender (yield_note, hybrid)
+    if (data.lender) {
+      if (data.lender.id) {
+        lenderId = data.lender.id;
+      } else {
+        const [newLender] = await db
+          .insert(lenders)
+          .values({
+            organizationId,
+            name: data.lender.name,
+            entityType: data.lender.type as any,
+            contactEmail: data.lender.contactEmail,
+            contactPhone: data.lender.contactPhone || null,
+          })
+          .returning();
+        lenderId = newLender.id;
+      }
+    }
+
+    // Create/link property (asset_backed, hybrid)
+    if (data.property) {
+      if (data.property.id) {
+        propertyId = data.property.id;
+      } else {
+        const [newProperty] = await db
+          .insert(properties)
+          .values({
+            organizationId,
+            address: data.property.address,
+            city: data.property.city,
+            state: data.property.state,
+            zip: data.property.zip || "",
+            propertyType: data.property.propertyType as any,
+            occupancy: data.property.occupancy || null,
+            estimatedValue: data.property.estimatedValue?.toString() || null,
+            purchasePrice: data.property.purchasePrice.toString(),
+            appraisedValue: data.property.appraisedValue?.toString() || null,
+            appraisalDate: data.property.appraisalDate ? new Date(data.property.appraisalDate) : null,
+            rehabBudget: data.property.rehabBudget?.toString() || null,
+            photos: data.property.photos || null,
+          })
+          .returning();
+        propertyId = newProperty.id;
+      }
+    }
+
+    // ============ CREATE LOAN ============
+
+    const propertyAddress = data.property?.address || null;
+
+    const [loan] = await db
+      .insert(loans)
+      .values({
+        organizationId,
+        loanCategory: data.loanCategory,
+        borrowerId,
+        lenderId,
+        propertyId,
+        propertyAddress,
+        principal: data.terms.principal.toString(),
+        rate: data.terms.rate.toString(),
+        termMonths: data.terms.termMonths,
+        paymentType: data.terms.paymentType,
+        paymentFrequency: data.terms.paymentFrequency,
+        originationFeeBps: data.terms.originationFeeBps || 0,
+        lateFeeBps: data.terms.lateFeeBps || 0,
+        defaultInterestBps: data.terms.defaultInterestBps || 0,
+        escrowEnabled: data.terms.escrowEnabled || false,
+        status: "draft",
+        statusChangedAt: new Date(),
+        createdBy,
+        // Backward compatibility
+        loanAmount: data.terms.principal.toString(),
+        interestRate: data.terms.rate.toString(),
+      })
+      .returning();
+
+    // ============ POPULATE JUNCTION TABLES (Hybrid Model) ============
+
+    // Add primary borrower to junction table
+    if (borrowerId) {
+      await db.insert(borrowerLoans).values({
+        borrowerId,
+        loanId: loan.id,
+        role: BorrowerRole.PRIMARY,
+        isPrimary: true,
+      }).onConflictDoNothing();
+    }
+
+    // Add primary lender to junction table
+    if (lenderId) {
+      await db.insert(lenderLoans).values({
+        lenderId,
+        loanId: loan.id,
+        role: LenderRole.PRIMARY,
+        isPrimary: true,
+        percentage: "100", // Primary lender has 100% by default
+      }).onConflictDoNothing();
+    }
+
+    // ============ CREATE EXTENDED TERMS ============
+
+    if (data.investment || data.terms) {
+      await db.insert(loanTerms).values({
+        loanId: loan.id,
+        amortizationMonths: data.terms.termMonths,
+        compounding: data.investment?.compounding || "simple",
+        notes: null,
+      });
+    }
+
+    // ============ CREATE COLLATERAL (if applicable) ============
+
+    if (data.collateral && (data.loanCategory === "asset_backed" || data.loanCategory === "hybrid")) {
+      await db.insert(collateral).values({
+        loanId: loan.id,
+        lienPosition: data.collateral.lienPosition || null,
+        description: data.collateral.description || null,
+        drawSchedule: data.collateral.drawSchedule || null,
+      });
+    }
+
+    // ============ CREATE DOCUMENTS ============
+
+    if (data.documents && data.documents.length > 0) {
+      for (const doc of data.documents) {
+        await db.insert(loanDocuments).values({
+          loanId: loan.id,
+          documentType: LoanDocumentType.OTHER,
+          fileName: doc.name,
+          fileUrl: doc.url,
+          fileSize: doc.size.toString(),
+          uploadedBy: "Wizard v2",
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        loanId: loan.id,
+        borrowerId,
+        lenderId,
+        propertyId,
+        category: loan.loanCategory,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating loan v2:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to create loan",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+

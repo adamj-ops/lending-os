@@ -1,0 +1,100 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { LoanStatusBadge } from "@/components/loan/loan-status-badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { Loan } from "@/types/loan";
+import { format } from "date-fns";
+
+export const createColumns = (onViewDetails: (loanId: string) => void): ColumnDef<Loan>[] => [
+  {
+    accessorKey: "propertyAddress",
+    header: "Property",
+    cell: ({ row }) => {
+      const address = row.getValue("propertyAddress") as string;
+      return <div className="font-medium">{address}</div>;
+    },
+  },
+  {
+    accessorKey: "loanAmount",
+    header: "Loan Amount",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("loanAmount"));
+      return <div className="tabular-nums">{formatCurrency(amount)}</div>;
+    },
+  },
+  {
+    accessorKey: "interestRate",
+    header: "Rate",
+    cell: ({ row }) => {
+      const rate = parseFloat(row.getValue("interestRate"));
+      return <div className="tabular-nums">{rate.toFixed(2)}%</div>;
+    },
+  },
+  {
+    accessorKey: "termMonths",
+    header: "Term",
+    cell: ({ row }) => {
+      const months = row.getValue("termMonths") as number;
+      return <div className="tabular-nums">{months} mo</div>;
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as Loan["status"];
+      return <LoanStatusBadge status={status as any} />;
+    },
+  },
+  {
+    accessorKey: "fundedDate",
+    header: "Funded Date",
+    cell: ({ row }) => {
+      const date = row.getValue("fundedDate") as Date | null;
+      return date ? format(new Date(date), "MMM d, yyyy") : <span className="text-muted-foreground">—</span>;
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const loan = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="size-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(loan.id)}
+            >
+              Copy loan ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onViewDetails(loan.id)}>
+              View details
+            </DropdownMenuItem>
+            <DropdownMenuItem>Edit loan</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
+

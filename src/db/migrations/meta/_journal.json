@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1761360045939,
+      "tag": "0000_needy_vector",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761360566611,
+      "tag": "0001_late_proteus",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761364077709,
+      "tag": "0002_dapper_wolfpack",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761429949631,
+      "tag": "0003_spicy_sleeper",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761442306508,
+      "tag": "0004_nasty_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761442781182,
+      "tag": "0005_fix_hybrid_relations",
+      "breakpoints": true
+    }
+  ]
+}

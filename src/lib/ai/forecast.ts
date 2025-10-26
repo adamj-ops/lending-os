@@ -1,0 +1,116 @@
+import type { ForecastInput, ForecastOutput, PaymentFrequency } from "@/features/loan-builder/types";
+
+/**
+ * AI Forecast for loan risk and ROI
+ * Phase 4: This will integrate with actual ML models
+ * Current: Heuristic-based calculations
+ */
+export async function forecastLoan(input: ForecastInput): Promise<ForecastOutput> {
+  const { principal, rate, termMonths, category, borrowerCreditScore, loanToValue } = input;
+
+  // Calculate projected ROI
+  const annualizedRate = rate / 100;
+  const termYears = termMonths / 12;
+  const roiPct = annualizedRate * termYears * 100;
+
+  // Calculate default probability (heuristic)
+  let defaultProb = 0.05; // Base 5%
+
+  // Adjust by category
+  if (category === "asset_backed") {
+    defaultProb = 0.03; // Lower risk with collateral
+    
+    // Adjust by LTV if provided
+    if (loanToValue) {
+      if (loanToValue > 0.8) defaultProb += 0.02;
+      if (loanToValue > 0.9) defaultProb += 0.03;
+      if (loanToValue < 0.6) defaultProb -= 0.01;
+    }
+    
+    // Adjust by credit score
+    if (borrowerCreditScore) {
+      if (borrowerCreditScore >= 750) defaultProb -= 0.01;
+      if (borrowerCreditScore < 650) defaultProb += 0.02;
+      if (borrowerCreditScore < 600) defaultProb += 0.04;
+    }
+  } else if (category === "yield_note") {
+    defaultProb = 0.06; // Slightly higher without collateral
+  } else if (category === "hybrid") {
+    defaultProb = 0.045; // Between asset-backed and yield note
+  }
+
+  // Cap probabilities
+  defaultProb = Math.max(0.01, Math.min(0.25, defaultProb));
+
+  // Calculate efficiency score (0-100)
+  // Higher ROI and lower default = higher efficiency
+  const riskAdjustedReturn = roiPct * (1 - defaultProb);
+  const efficiency = Math.min(100, Math.max(0, riskAdjustedReturn * 10));
+
+  // Determine risk level
+  let riskLevel: "low" | "medium" | "high" = "medium";
+  if (defaultProb < 0.03) riskLevel = "low";
+  if (defaultProb > 0.08) riskLevel = "high";
+
+  // Recommend funding source based on risk and amount
+  let recommendedFunding: ForecastOutput["recommendedFunding"];
+  if (principal > 1000000 || riskLevel === "high") {
+    recommendedFunding = "bank";
+  } else if (category === "yield_note") {
+    recommendedFunding = "escrow";
+  } else {
+    recommendedFunding = "internal";
+  }
+
+  return {
+    roiPct: Math.round(roiPct * 100) / 100,
+    defaultProb: Math.round(defaultProb * 10000) / 10000,
+    efficiency: Math.round(efficiency * 10) / 10,
+    recommendedFunding,
+    riskLevel,
+  };
+}
+
+/**
+ * Calculate loan-to-value ratio
+ */
+export function calculateLTV(loanAmount: number, propertyValue: number): number {
+  if (propertyValue <= 0) return 0;
+  return loanAmount / propertyValue;
+}
+
+/**
+ * Calculate monthly payment for amortized loan
+ */
+export function calculateMonthlyPayment(
+  principal: number,
+  annualRate: number,
+  termMonths: number
+): number {
+  if (termMonths === 0) return 0;
+  
+  const monthlyRate = annualRate / 100 / 12;
+  
+  if (monthlyRate === 0) {
+    return principal / termMonths;
+  }
+  
+  const payment =
+    (principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+    (Math.pow(1 + monthlyRate, termMonths) - 1);
+  
+  return Math.round(payment * 100) / 100;
+}
+
+/**
+ * Calculate interest-only payment
+ */
+export function calculateInterestOnlyPayment(
+  principal: number,
+  annualRate: number,
+  frequency: PaymentFrequency
+): number {
+  const periods = frequency === "monthly" ? 12 : frequency === "quarterly" ? 4 : 1;
+  return (principal * (annualRate / 100)) / periods;
+}
+

@@ -1,0 +1,306 @@
+"use client";
+
+import { useFormContext } from "react-hook-form";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import type { CreateLoanFormData } from "@/features/loan-builder/types";
+
+interface LoanTermsStepProps {
+  onNext: () => void;
+  onBack: () => void;
+}
+
+export function LoanTermsStep({ onNext }: LoanTermsStepProps) {
+  const { control, watch } = useFormContext<CreateLoanFormData>();
+  
+  const principal = watch("terms.principal");
+  const rate = watch("terms.rate");
+  const termMonths = watch("terms.termMonths");
+
+  const termPresets = [12, 24, 36, 60, 84, 120];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="mb-2 text-2xl font-bold">Loan Terms & Economics</h2>
+        <p className="text-muted-foreground">
+          Set the core loan parameters, payment structure, and fee policies
+        </p>
+      </div>
+
+      {/* Core Terms */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Core Terms</h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={control}
+            name="terms.principal"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Principal Amount *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="500000"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    min="0"
+                    step="1000"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="terms.rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Interest Rate (%) *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="5.5"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    min="0"
+                    max="100"
+                    step="0.01"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={control}
+          name="terms.termMonths"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Term (Months) *</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="36"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  min="1"
+                />
+              </FormControl>
+              <FormDescription>
+                Quick presets:
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {termPresets.map((months) => (
+                    <Button
+                      key={months}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => field.onChange(months)}
+                    >
+                      {months} mo
+                    </Button>
+                  ))}
+                </div>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Payment Structure */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Payment Structure</h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={control}
+            name="terms.paymentType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Type *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "amortized"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select payment type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="interest_only">Interest Only</SelectItem>
+                    <SelectItem value="amortized">Amortized</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="terms.paymentFrequency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Frequency *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "monthly"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="maturity">At Maturity</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Fees */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Fees (Basis Points)</h3>
+        <FormDescription>
+          Basis points: 100 BPS = 1%. Enter whole numbers (e.g., 250 for 2.5%)
+        </FormDescription>
+        
+        <div className="grid gap-4 md:grid-cols-3">
+          <FormField
+            control={control}
+            name="terms.originationFeeBps"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Origination Fee (BPS)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="250"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    min="0"
+                    max="5000"
+                  />
+                </FormControl>
+                <FormDescription>
+                  {field.value ? `${field.value} BPS (${(field.value / 100).toFixed(2)}%)` : "Optional"}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="terms.lateFeeBps"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Late Fee (BPS)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="500"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    min="0"
+                    max="5000"
+                  />
+                </FormControl>
+                <FormDescription>
+                  {field.value ? `${field.value} BPS (${(field.value / 100).toFixed(2)}%)` : "Optional"}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="terms.defaultInterestBps"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Interest (BPS)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="1000"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    min="0"
+                    max="5000"
+                  />
+                </FormControl>
+                <FormDescription>
+                  {field.value ? `${field.value} BPS (${(field.value / 100).toFixed(2)}%)` : "Optional"}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Escrow */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Additional Features</h3>
+        
+        <FormField
+          control={control}
+          name="terms.escrowEnabled"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Escrow Enabled</FormLabel>
+                <FormDescription>
+                  Enable escrow account for tax and insurance payments
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch checked={field.value || false} onCheckedChange={field.onChange} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Summary */}
+      {principal && rate && termMonths && (
+        <div className="rounded-lg border border-primary/50 bg-primary/5 p-4">
+          <p className="mb-2 font-medium">Loan Summary</p>
+          <div className="grid gap-2 text-sm md:grid-cols-3">
+            <div>
+              <p className="text-muted-foreground">Principal</p>
+              <p className="font-medium">${principal?.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Rate</p>
+              <p className="font-medium">{rate?.toFixed(2)}%</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Term</p>
+              <p className="font-medium">{termMonths} months</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

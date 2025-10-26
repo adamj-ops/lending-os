@@ -1,0 +1,231 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Download, Trash2, FileText, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FileUpload, type UploadedFile } from "@/components/ui/file-upload";
+import type { LoanDocument } from "@/types/loan-document";
+import { LoanDocumentType } from "@/types/loan-document";
+import { toast } from "sonner";
+
+interface DocumentsTabProps {
+  loanId: string;
+}
+
+export function DocumentsTab({ loanId }: DocumentsTabProps) {
+  const [documents, setDocuments] = useState<LoanDocument[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedType, setSelectedType] = useState<LoanDocumentType>(
+    LoanDocumentType.OTHER
+  );
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [loanId]);
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch(`/api/v1/loans/${loanId}/documents`);
+      const result = await response.json();
+
+      if (result.success) {
+        setDocuments(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpload = async (files: UploadedFile[]) => {
+    setIsUploading(true);
+    try {
+      for (const file of files) {
+        await fetch(`/api/v1/loans/${loanId}/documents`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            documentType: selectedType,
+            fileName: file.name,
+            fileUrl: file.url,
+            fileSize: file.size.toString(),
+            uploadedBy: "Current User",
+          }),
+        });
+      }
+
+      toast.success("Documents uploaded successfully");
+      fetchDocuments();
+    } catch (error) {
+      console.error("Error uploading documents:", error);
+      toast.error("Failed to upload documents");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (docId: string) => {
+    try {
+      const response = await fetch(
+        `/api/v1/loans/${loanId}/documents/${docId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Document deleted");
+        fetchDocuments();
+      }
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast.error("Failed to delete document");
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatFileSize = (size: string | null) => {
+    if (!size) return "Unknown size";
+    const bytes = parseInt(size);
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              Document Type
+            </label>
+            <Select
+              value={selectedType}
+              onValueChange={(value) => setSelectedType(value as LoanDocumentType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={LoanDocumentType.APPLICATION}>
+                  Application
+                </SelectItem>
+                <SelectItem value={LoanDocumentType.APPRAISAL}>
+                  Appraisal
+                </SelectItem>
+                <SelectItem value={LoanDocumentType.TITLE}>Title</SelectItem>
+                <SelectItem value={LoanDocumentType.INSURANCE}>
+                  Insurance
+                </SelectItem>
+                <SelectItem value={LoanDocumentType.CLOSING_DOCS}>
+                  Closing Documents
+                </SelectItem>
+                <SelectItem value={LoanDocumentType.OTHER}>Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <FileUpload
+            onUpload={handleUpload}
+            folder="loan-documents"
+            maxFiles={10}
+            maxSize={25}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Documents ({documents.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <p className="text-muted-foreground">Loading documents...</p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="flex h-32 flex-col items-center justify-center">
+              <FileText className="mb-2 size-12 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                No documents uploaded yet
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="size-8 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{doc.fileName}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Badge variant="outline" className="text-xs">
+                          {doc.documentType.replace("_", " ")}
+                        </Badge>
+                        <span>•</span>
+                        <span>{formatFileSize(doc.fileSize)}</span>
+                        <span>•</span>
+                        <span>{formatDate(doc.uploadedAt)}</span>
+                        {doc.uploadedBy && (
+                          <>
+                            <span>•</span>
+                            <span>by {doc.uploadedBy}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                    >
+                      <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                        <Download className="size-4" />
+                      </a>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(doc.id)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+

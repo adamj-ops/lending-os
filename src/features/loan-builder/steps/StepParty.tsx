@@ -1,0 +1,368 @@
+"use client";
+
+import { useFormContext } from "react-hook-form";
+import { Search, User, Building2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import type { CreateLoanFormData } from "../types";
+
+export function StepParty() {
+  const { control, watch } = useFormContext<CreateLoanFormData>();
+  const loanCategory = watch("loanCategory");
+  const [mode, setMode] = useState<"existing" | "new">("new");
+  const [borrowers, setBorrowers] = useState<any[]>([]);
+  const [lenders, setLenders] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const showBorrower = loanCategory === "asset_backed" || loanCategory === "hybrid";
+  const showLender = loanCategory === "yield_note" || loanCategory === "hybrid";
+
+  useEffect(() => {
+    if (mode === "existing") {
+      if (showBorrower) fetchBorrowers();
+      if (showLender) fetchLenders();
+    }
+  }, [mode, showBorrower, showLender]);
+
+  const fetchBorrowers = async () => {
+    try {
+      const response = await fetch("/api/v1/borrowers");
+      const result = await response.json();
+      if (result.success) setBorrowers(result.data);
+    } catch (error) {
+      console.error("Error fetching borrowers:", error);
+    }
+  };
+
+  const fetchLenders = async () => {
+    try {
+      const response = await fetch("/api/v1/lenders");
+      const result = await response.json();
+      if (result.success) setLenders(result.data);
+    } catch (error) {
+      console.error("Error fetching lenders:", error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="mb-2 text-2xl font-bold">
+          {showBorrower && showLender ? "Parties Information" : showBorrower ? "Borrower Information" : "Investor Information"}
+        </h2>
+        <p className="text-muted-foreground">
+          {showBorrower && showLender
+            ? "Enter both borrower and investor information"
+            : showBorrower
+              ? "Enter borrower information for this loan"
+              : "Enter investor/lender information for this note"}
+        </p>
+      </div>
+
+      <Tabs value={mode} onValueChange={(v) => setMode(v as "existing" | "new")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="existing">Select Existing</TabsTrigger>
+          <TabsTrigger value="new">Create New</TabsTrigger>
+        </TabsList>
+
+        {showBorrower && (
+          <TabsContent value="new" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="size-5" />
+                  Borrower Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={control}
+                  name="borrower.type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Borrower Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="individual">Individual</SelectItem>
+                          <SelectItem value="entity">Entity/Company</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {watch("borrower.type") === "individual" ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={control}
+                      name="borrower.firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={control}
+                      name="borrower.lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ) : watch("borrower.type") === "entity" ? (
+                  <FormField
+                    control={control}
+                    name="borrower.name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Entity Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ABC Development LLC" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name="borrower.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email *</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="john@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="borrower.phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="(555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={control}
+                  name="borrower.address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123 Main St, City, State ZIP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name="borrower.creditScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Credit Score</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="300"
+                            max="850"
+                            placeholder="720"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>300-850</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="borrower.taxId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tax ID (SSN/EIN)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="***-**-****" type="password" {...field} />
+                        </FormControl>
+                        <FormDescription>Will be encrypted</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {showLender && (
+          <TabsContent value="new" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="size-5" />
+                  Investor/Lender Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={control}
+                  name="lender.type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Investor Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="individual">Individual</SelectItem>
+                          <SelectItem value="fund">Fund</SelectItem>
+                          <SelectItem value="ira">IRA/Retirement Account</SelectItem>
+                          <SelectItem value="company">Company</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="lender.name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Lender Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Smith" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name="lender.contactEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Email *</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="investor@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="lender.contactPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Phone</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="(555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        <TabsContent value="existing" className="space-y-4">
+          {showBorrower && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Search Existing Borrowers</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                {/* Existing borrower list would go here */}
+                <p className="text-sm text-muted-foreground">
+                  {borrowers.length} borrowers found
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {showLender && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Search Existing Lenders</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {lenders.length} lenders found
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+

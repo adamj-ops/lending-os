@@ -1,0 +1,146 @@
+"use client";
+
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { ParticipationSplit } from "../types";
+
+interface ParticipationSplitsProps {
+  splits: ParticipationSplit[];
+  totalPrincipal: number;
+  onChange: (splits: ParticipationSplit[]) => void;
+}
+
+export function ParticipationSplits({
+  splits,
+  totalPrincipal,
+  onChange,
+}: ParticipationSplitsProps) {
+  const addSplit = () => {
+    onChange([
+      ...splits,
+      {
+        lenderId: "",
+        percentage: 0,
+        amount: 0,
+      },
+    ]);
+  };
+
+  const removeSplit = (index: number) => {
+    onChange(splits.filter((_, i) => i !== index));
+  };
+
+  const updateSplit = (
+    index: number,
+    field: keyof ParticipationSplit,
+    value: any
+  ) => {
+    const updated = [...splits];
+    updated[index] = { ...updated[index], [field]: value };
+
+    // Auto-calculate amount when percentage changes
+    if (field === "percentage" && totalPrincipal > 0) {
+      updated[index].amount = (totalPrincipal * value) / 100;
+    }
+    // Auto-calculate percentage when amount changes
+    if (field === "amount" && totalPrincipal > 0) {
+      updated[index].percentage = (value / totalPrincipal) * 100;
+    }
+
+    onChange(updated);
+  };
+
+  const totalPercentage = splits.reduce((sum, split) => sum + (split.percentage || 0), 0);
+  const totalAmount = splits.reduce((sum, split) => sum + (split.amount || 0), 0);
+  const isValid = Math.abs(totalPercentage - 100) < 0.01;
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        {splits.map((split, index) => (
+          <div key={index} className="flex items-end gap-3 rounded-lg border p-3">
+            <div className="flex-1">
+              <Label className="text-xs">Lender/Investor</Label>
+              <Input
+                value={split.lenderName || split.lenderId}
+                onChange={(e) => updateSplit(index, "lenderId", e.target.value)}
+                placeholder="Select lender..."
+              />
+            </div>
+
+            <div className="w-24">
+              <Label className="text-xs">Percentage</Label>
+              <Input
+                type="number"
+                value={split.percentage}
+                onChange={(e) =>
+                  updateSplit(index, "percentage", parseFloat(e.target.value))
+                }
+                placeholder="25"
+                min="0"
+                max="100"
+                step="0.01"
+              />
+            </div>
+
+            <div className="w-32">
+              <Label className="text-xs">Amount</Label>
+              <Input
+                type="number"
+                value={split.amount}
+                onChange={(e) =>
+                  updateSplit(index, "amount", parseFloat(e.target.value))
+                }
+                placeholder="250000"
+              />
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeSplit(index)}
+            >
+              <Trash2 className="size-4 text-destructive" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Button type="button" variant="outline" size="sm" onClick={addSplit}>
+          <Plus className="mr-2 size-4" />
+          Add Participant
+        </Button>
+
+        {splits.length > 0 && (
+          <div className="space-y-1 text-right text-sm">
+            <div>
+              <span className="text-muted-foreground">Total: </span>
+              <span
+                className={`font-semibold ${!isValid ? "text-destructive" : ""}`}
+              >
+                {totalPercentage.toFixed(2)}% / $
+                {totalAmount.toLocaleString()}
+              </span>
+            </div>
+            {!isValid && (
+              <p className="text-xs text-destructive">
+                Percentages must total 100%
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {splits.length === 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          No participants added. Single lender will fund 100%.
+        </p>
+      )}
+    </div>
+  );
+}
+

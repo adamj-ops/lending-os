@@ -1,0 +1,540 @@
+"use client";
+
+import { useFormContext } from "react-hook-form";
+import { Home, TrendingUp, Plus, CalendarIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState } from "react";
+import type { CreateLoanFormData } from "../types";
+
+export function StepAsset() {
+  const { control, watch } = useFormContext<CreateLoanFormData>();
+  const loanCategory = watch("loanCategory");
+  const [mode, setMode] = useState<"existing" | "new">("new");
+
+  const showProperty = loanCategory === "asset_backed" || loanCategory === "hybrid";
+  const showInvestment = loanCategory === "yield_note" || loanCategory === "hybrid";
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="mb-2 text-2xl font-bold">
+          {showProperty && showInvestment
+            ? "Asset & Capital Details"
+            : showProperty
+              ? "Property Details"
+              : "Investment Details"}
+        </h2>
+        <p className="text-muted-foreground">
+          {showProperty && showInvestment
+            ? "Enter property collateral and investment capital information"
+            : showProperty
+              ? "Enter property information that will secure this loan"
+              : "Enter investment terms and capital commitment"}
+        </p>
+      </div>
+
+      {/* Property Section for Asset-Backed/Hybrid */}
+      {showProperty && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Home className="size-5" />
+              Property Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Tabs value={mode} onValueChange={(v) => setMode(v as "existing" | "new")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="existing">Select Existing</TabsTrigger>
+                <TabsTrigger value="new">Create New</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="new" className="space-y-4">
+                <FormField
+                  control={control}
+                  name="property.address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Property Address *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123 Main St" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <FormField
+                    control={control}
+                    name="property.city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="City" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="property.state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ST" maxLength={2} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="property.zip"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ZIP Code</FormLabel>
+                        <FormControl>
+                          <Input placeholder="12345" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name="property.propertyType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Property Type *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="single_family">Single Family</SelectItem>
+                            <SelectItem value="multi_family">Multi Family</SelectItem>
+                            <SelectItem value="commercial">Commercial</SelectItem>
+                            <SelectItem value="land">Land</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="property.occupancy"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Occupancy</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select occupancy" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="owner_occupied">Owner Occupied</SelectItem>
+                            <SelectItem value="tenant_occupied">Tenant Occupied</SelectItem>
+                            <SelectItem value="vacant">Vacant</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <FormField
+                    control={control}
+                    name="property.purchasePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Purchase Price *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="500000"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="property.estimatedValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estimated Value</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="550000"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name="property.rehabBudget"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rehab Budget</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="50000"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {loanCategory === "hybrid" && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      <strong>Hybrid Note:</strong> Collateral assignment may be marked as "TBD" for
+                      capital pool loans
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="existing">
+                <div className="rounded-lg border border-dashed p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Search and select existing property
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Investment Section for Yield Note/Hybrid */}
+      {showInvestment && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="size-5" />
+              Investment Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={control}
+              name="investment.investmentType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Investment Type *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select investment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="fixed_yield">Fixed Yield</SelectItem>
+                      <SelectItem value="revenue_share">Revenue Share</SelectItem>
+                      <SelectItem value="profit_participation">Profit Participation</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={control}
+                name="investment.committedAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Committed Amount *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="250000"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="investment.returnRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Return Rate (%) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="8.5"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={control}
+                name="investment.compounding"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Compounding</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || "simple"}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="simple">Simple</SelectItem>
+                        <SelectItem value="compound">Compound</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="investment.paymentFrequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Frequency *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="maturity">At Maturity</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={control}
+                name="investment.startDate"
+                render={({ field }) => {
+                  const [open, setOpen] = useState(false);
+                  const [inputValue, setInputValue] = useState("");
+                  const [month, setMonth] = useState<Date | undefined>(field.value ? new Date(field.value) : new Date());
+                  const selectedDate = field.value ? new Date(field.value) : undefined;
+                  
+                  const formatDisplayDate = (date: Date | undefined) => {
+                    if (!date) return "";
+                    return date.toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    });
+                  };
+
+                  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const value = e.target.value;
+                    setInputValue(value);
+                    
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                      field.onChange(date.toISOString().split('T')[0]);
+                      setMonth(date);
+                    }
+                  };
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Start Date *</FormLabel>
+                      <div className="relative flex gap-2">
+                        <FormControl>
+                          <Input
+                            value={inputValue || formatDisplayDate(selectedDate)}
+                            onChange={handleInputChange}
+                            onFocus={() => setInputValue("")}
+                            onBlur={() => setInputValue("")}
+                            placeholder="Select or type date"
+                            className="pr-10"
+                          />
+                        </FormControl>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+                              type="button"
+                            >
+                              <CalendarIcon className="size-3.5" />
+                              <span className="sr-only">Select date</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="end" sideOffset={10}>
+                            <Calendar
+                              mode="single"
+                              selected={selectedDate}
+                              month={month}
+                              onMonthChange={setMonth}
+                              captionLayout="dropdown"
+                              fromYear={2020}
+                              toYear={2050}
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(date.toISOString().split('T')[0]);
+                                  setMonth(date);
+                                  setOpen(false);
+                                }
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+
+              <FormField
+                control={control}
+                name="investment.maturityDate"
+                render={({ field }) => {
+                  const [open, setOpen] = useState(false);
+                  const [inputValue, setInputValue] = useState("");
+                  const [month, setMonth] = useState<Date | undefined>(field.value ? new Date(field.value) : new Date());
+                  const selectedDate = field.value ? new Date(field.value) : undefined;
+                  
+                  const formatDisplayDate = (date: Date | undefined) => {
+                    if (!date) return "";
+                    return date.toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    });
+                  };
+
+                  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const value = e.target.value;
+                    setInputValue(value);
+                    
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                      field.onChange(date.toISOString().split('T')[0]);
+                      setMonth(date);
+                    }
+                  };
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Maturity Date *</FormLabel>
+                      <div className="relative flex gap-2">
+                        <FormControl>
+                          <Input
+                            value={inputValue || formatDisplayDate(selectedDate)}
+                            onChange={handleInputChange}
+                            onFocus={() => setInputValue("")}
+                            onBlur={() => setInputValue("")}
+                            placeholder="Select or type date"
+                            className="pr-10"
+                          />
+                        </FormControl>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+                              type="button"
+                            >
+                              <CalendarIcon className="size-3.5" />
+                              <span className="sr-only">Select date</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="end" sideOffset={10}>
+                            <Calendar
+                              mode="single"
+                              selected={selectedDate}
+                              month={month}
+                              onMonthChange={setMonth}
+                              captionLayout="dropdown"
+                              fromYear={2024}
+                              toYear={2060}
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(date.toISOString().split('T')[0]);
+                                  setMonth(date);
+                                  setOpen(false);
+                                }
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+

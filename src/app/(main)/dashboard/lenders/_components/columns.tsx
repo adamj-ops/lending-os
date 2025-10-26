@@ -1,0 +1,147 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal, Trash, Edit } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useDeleteLender } from "@/hooks/useLenders";
+import type { Lender } from "@/types/lender";
+
+interface LenderWithLoanCount extends Lender {
+  loanCount?: number;
+}
+
+export const createColumns = (onEdit: (lender: Lender) => void): ColumnDef<LenderWithLoanCount>[] => [
+  {
+    accessorKey: "name",
+    header: "Name",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return <div className="font-medium">{row.getValue("name")}</div>;
+    },
+  },
+  {
+    accessorKey: "entityType",
+    header: "Type",
+    enableSorting: true,
+    cell: ({ row }) => {
+      const type = row.getValue("entityType") as string;
+      const labels: Record<string, string> = {
+        individual: "Individual",
+        company: "Company",
+        fund: "Fund",
+        ira: "IRA",
+      };
+      return <Badge variant="outline">{labels[type] || type}</Badge>;
+    },
+  },
+  {
+    accessorKey: "contactEmail",
+    header: "Email",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return <div className="text-sm">{row.getValue("contactEmail")}</div>;
+    },
+  },
+  {
+    accessorKey: "totalCommitted",
+    header: "Committed",
+    enableSorting: true,
+    sortingFn: (rowA, rowB) => {
+      const a = parseFloat(rowA.getValue("totalCommitted"));
+      const b = parseFloat(rowB.getValue("totalCommitted"));
+      return a - b;
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("totalCommitted"));
+      return <div className="tabular-nums">{formatCurrency(amount, { noDecimals: true })}</div>;
+    },
+  },
+  {
+    accessorKey: "totalDeployed",
+    header: "Deployed",
+    enableSorting: true,
+    sortingFn: (rowA, rowB) => {
+      const a = parseFloat(rowA.getValue("totalDeployed"));
+      const b = parseFloat(rowB.getValue("totalDeployed"));
+      return a - b;
+    },
+    cell: ({ row }) => {
+      const committed = parseFloat(row.original.totalCommitted);
+      const deployed = parseFloat(row.getValue("totalDeployed"));
+      const percentage = committed > 0 ? (deployed / committed) * 100 : 0;
+
+      return (
+        <div>
+          <div className="tabular-nums">{formatCurrency(deployed, { noDecimals: true })}</div>
+          <div className="text-muted-foreground text-xs tabular-nums">{percentage.toFixed(0)}% utilized</div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "loanCount",
+    header: "Loans",
+    enableSorting: true,
+    cell: ({ row }) => {
+      const count = row.original.loanCount ?? 0;
+
+      return (
+        <Badge variant="secondary" className="tabular-nums">
+          {count}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const lender = row.original;
+      const deleteLender = useDeleteLender();
+
+      const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this lender?")) {
+          await deleteLender.mutateAsync(lender.id);
+        }
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="size-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(lender.contactEmail)}>
+              Copy email
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View details</DropdownMenuItem>
+            <DropdownMenuItem>View loans</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(lender)}>
+              <Edit className="mr-2 size-4" />
+              Edit lender
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+              <Trash className="mr-2 size-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];

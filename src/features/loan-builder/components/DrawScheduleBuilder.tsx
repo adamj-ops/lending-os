@@ -1,0 +1,108 @@
+"use client";
+
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { DrawScheduleItem } from "../types";
+
+interface DrawScheduleBuilderProps {
+  draws: DrawScheduleItem[];
+  onChange: (draws: DrawScheduleItem[]) => void;
+}
+
+export function DrawScheduleBuilder({ draws, onChange }: DrawScheduleBuilderProps) {
+  const addDraw = () => {
+    onChange([
+      ...draws,
+      {
+        n: draws.length + 1,
+        amount: 0,
+        note: "",
+      },
+    ]);
+  };
+
+  const removeDraw = (index: number) => {
+    onChange(draws.filter((_, i) => i !== index));
+  };
+
+  const updateDraw = (index: number, field: keyof DrawScheduleItem, value: any) => {
+    const updated = [...draws];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const totalDraws = draws.reduce((sum, draw) => sum + (draw.amount || 0), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        {draws.map((draw, index) => (
+          <div key={index} className="flex items-end gap-3 rounded-lg border p-3">
+            <div className="flex-shrink-0">
+              <Label className="text-xs">Draw #</Label>
+              <Input
+                type="number"
+                value={draw.n}
+                onChange={(e) => updateDraw(index, "n", parseInt(e.target.value))}
+                className="w-16"
+              />
+            </div>
+
+            <div className="flex-1">
+              <Label className="text-xs">Amount</Label>
+              <Input
+                type="number"
+                value={draw.amount}
+                onChange={(e) => updateDraw(index, "amount", parseFloat(e.target.value))}
+                placeholder="50000"
+              />
+            </div>
+
+            <div className="flex-1">
+              <Label className="text-xs">Note</Label>
+              <Input
+                value={draw.note || ""}
+                onChange={(e) => updateDraw(index, "note", e.target.value)}
+                placeholder="Foundation work"
+              />
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeDraw(index)}
+            >
+              <Trash2 className="size-4 text-destructive" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Button type="button" variant="outline" size="sm" onClick={addDraw}>
+          <Plus className="mr-2 size-4" />
+          Add Draw
+        </Button>
+
+        {draws.length > 0 && (
+          <div className="text-sm">
+            <span className="text-muted-foreground">Total: </span>
+            <span className="font-semibold">
+              ${totalDraws.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {draws.length === 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          No draws added. Click "Add Draw" to create a schedule for construction loans.
+        </p>
+      )}
+    </div>
+  );
+}
+
