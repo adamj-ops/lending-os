@@ -17,7 +17,9 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
     "db:clear": "tsx src/db/clear.ts",
-    "db:reset": "tsx src/db/clear.ts && tsx src/db/seed.ts"
+    "db:reset": "tsx src/db/clear.ts && tsx src/db/seed.ts",
+    "agent:seed": "tsx src/scripts/seed-data-agent.ts",
+    "agent:seed:reset": "tsx src/scripts/seed-data-agent.ts --reset"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [
