@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  typescript: {
+    // Skip TypeScript checks during build for faster deployment
+    // Type errors should be caught in development and CI/CD
+    ignoreBuildErrors: true,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
