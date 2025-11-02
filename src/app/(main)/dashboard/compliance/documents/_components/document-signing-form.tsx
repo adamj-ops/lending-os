@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface DocumentSigningFormProps {
   organizationId: string;
@@ -34,7 +34,6 @@ export function DocumentSigningForm({
     { email: "", name: "", role: "signer" },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const addSigner = () => {
     setSigners([...signers, { email: "", name: "", role: "signer" }]);
@@ -72,18 +71,11 @@ export function DocumentSigningForm({
         throw new Error("Failed to create signature envelope");
       }
 
-      toast({
-        title: "Success",
-        description: "Signature envelope created successfully",
-      });
+      toast.success("Signature envelope created successfully");
 
       onSuccess?.();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create signature envelope",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to create signature envelope");
     } finally {
       setIsSubmitting(false);
     }

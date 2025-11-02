@@ -79,7 +79,16 @@ export async function PATCH(
       );
     } else {
       // Regular update
-      filing = await ComplianceService.updateFiling(id, session.organizationId, data);
+      const updateData = data as {
+        filingType?: string;
+        filingName?: string;
+        description?: string | null;
+        dueDate?: Date;
+        status?: string;
+        documentId?: string | null;
+        notes?: string | null;
+      };
+      filing = await ComplianceService.updateFiling(id, session.organizationId, updateData);
     }
 
     return NextResponse.json({

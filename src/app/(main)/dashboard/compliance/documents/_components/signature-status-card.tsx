@@ -23,10 +23,10 @@ export function SignatureStatusCard({
 }: SignatureStatusCardProps) {
   const statusConfig = {
     draft: { label: "Draft", variant: "secondary" as const, icon: IconClock },
-    sent: { label: "Sent", variant: "default" as const, icon: IconClock },
-    viewed: { label: "Viewed", variant: "default" as const, icon: IconClock },
-    signed: { label: "Signed", variant: "default" as const, icon: IconCheck },
-    completed: { label: "Completed", variant: "default" as const, icon: IconCheck },
+    sent: { label: "Sent", variant: "info" as const, icon: IconClock },
+    viewed: { label: "Viewed", variant: "info" as const, icon: IconClock },
+    signed: { label: "Signed", variant: "success" as const, icon: IconCheck },
+    completed: { label: "Completed", variant: "success" as const, icon: IconCheck },
     declined: { label: "Declined", variant: "destructive" as const, icon: IconX },
     voided: { label: "Voided", variant: "secondary" as const, icon: IconX },
   };
@@ -54,7 +54,7 @@ export function SignatureStatusCard({
               {signers.map((signer, index) => (
                 <div key={index} className="flex items-center justify-between text-sm">
                   <span>{signer.name || signer.email}</span>
-                  <Badge variant={signer.status === "signed" ? "default" : "secondary"} size="sm">
+                  <Badge variant={signer.status === "signed" ? "success" : "secondary"} size="sm">
                     {signer.status}
                   </Badge>
                 </div>

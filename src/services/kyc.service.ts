@@ -81,9 +81,9 @@ export class KYCService {
 
     // Publish event
     await eventBus.publish({
-      eventType: "KYC.Initiated",
-      domain: "Compliance",
-      aggregateType: "KYCVerification",
+      
+      eventVersion: "1.0",
+aggregateType: "KYCVerification",
       aggregateId: verification.id,
       payload: {
         verificationId: verification.id,
@@ -217,9 +217,9 @@ export class KYCService {
 
     // Publish event
     await eventBus.publish({
-      eventType: "KYC.DocumentUploaded",
-      domain: "Compliance",
-      aggregateType: "KYCVerification",
+      
+      eventVersion: "1.0",
+aggregateType: "KYCVerification",
       aggregateId: data.verificationId,
       payload: {
         verificationId: data.verificationId,
@@ -278,7 +278,6 @@ export class KYCService {
 
     await eventBus.publish({
       eventType,
-      domain: "Compliance",
       aggregateType: "KYCVerification",
       aggregateId: verification.id,
       payload: {

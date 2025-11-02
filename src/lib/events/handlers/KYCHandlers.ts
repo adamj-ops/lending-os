@@ -24,7 +24,7 @@ export async function handleKYCApproved(event: DomainEvent<any>): Promise<void> 
     // Just publish the Borrower.KYCApproved event
     await eventBus.publish({
       eventType: "Borrower.KYCApproved",
-      domain: "Borrower",
+      eventVersion: "1.0",
       aggregateType: "Borrower",
       aggregateId: borrowerId,
       payload: {

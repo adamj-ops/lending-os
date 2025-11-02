@@ -150,7 +150,7 @@ export class ComplianceService {
     if (daysUntilDue <= 30) {
       await eventBus.publish({
         eventType: "Filing.Due",
-        domain: "Compliance",
+        eventVersion: "1.0",
         aggregateType: "ComplianceFiling",
         aggregateId: filing.id,
         payload: {
@@ -229,9 +229,9 @@ export class ComplianceService {
 
     // Publish event
     await eventBus.publish({
-      eventType: "Filing.Submitted",
-      domain: "Compliance",
-      aggregateType: "ComplianceFiling",
+      
+      eventVersion: "1.0",
+aggregateType: "ComplianceFiling",
       aggregateId: filingId,
       payload: {
         filingId,
@@ -272,9 +272,9 @@ export class ComplianceService {
     );
     if (daysUntilExpiration <= 90 && daysUntilExpiration > 0) {
       await eventBus.publish({
-        eventType: "License.Expiring",
-        domain: "Compliance",
-        aggregateType: "License",
+        
+      eventVersion: "1.0",
+aggregateType: "License",
         aggregateId: license.id,
         payload: {
           licenseId: license.id,
@@ -336,9 +336,9 @@ export class ComplianceService {
 
     // Publish event
     await eventBus.publish({
-      eventType: "Audit.Created",
-      domain: "Compliance",
-      aggregateType: "AuditLog",
+      
+      eventVersion: "1.0",
+aggregateType: "AuditLog",
       aggregateId: auditLog.id,
       payload: {
         auditLogId: auditLog.id,
@@ -510,9 +510,9 @@ export class ComplianceService {
     // Publish event if status changed
     if (data.status && data.status !== currentFiling.status) {
       await eventBus.publish({
-        eventType: "Filing.StatusChanged",
-        domain: "Compliance",
-        aggregateType: "ComplianceFiling",
+        
+      eventVersion: "1.0",
+aggregateType: "ComplianceFiling",
         aggregateId: id,
         payload: {
           filingId: id,
@@ -644,9 +644,9 @@ export class ComplianceService {
     // Publish event if status changed
     if (data.status && data.status !== currentLicense.status) {
       await eventBus.publish({
-        eventType: "License.StatusChanged",
-        domain: "Compliance",
-        aggregateType: "License",
+        
+      eventVersion: "1.0",
+aggregateType: "License",
         aggregateId: id,
         payload: {
           licenseId: id,

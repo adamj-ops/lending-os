@@ -228,7 +228,6 @@ export class SignatureService {
 
     await eventBus.publish({
       eventType,
-      domain: "Compliance",
       aggregateType: "DocumentSignature",
       aggregateId: signature.id,
       payload: {

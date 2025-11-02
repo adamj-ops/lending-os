@@ -42,7 +42,7 @@ export async function GET(
     const documentBuffer = await adapter.downloadSignedDocument(signature.envelopeId);
 
     // Return as PDF
-    return new NextResponse(documentBuffer, {
+    return new NextResponse(documentBuffer as unknown as BodyInit, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

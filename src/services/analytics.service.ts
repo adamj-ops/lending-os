@@ -250,7 +250,6 @@ export class AnalyticsService {
       .values({
         eventId: event.id,
         eventType: event.type,
-        domain: event.domain || null,
         aggregateId: event.aggregateId || null,
         payload: event.payload as any,
         occurredAt: new Date(event.occurredAt as any),

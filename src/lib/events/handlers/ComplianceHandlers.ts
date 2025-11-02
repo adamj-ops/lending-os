@@ -10,6 +10,7 @@ import { SignatureService } from '@/services/signature.service';
 import { LoanService } from '@/services/loan.service';
 import { FundService } from '@/services/fund.service';
 import { BorrowerService } from '@/services/borrower.service';
+import { LenderService } from '@/services/lender.service';
 import { ComplianceService } from '@/services/compliance.service';
 import { EventTypes } from '../types';
 
@@ -31,7 +32,7 @@ export async function handleLoanCreated(event: DomainEvent<any>): Promise<void> 
 
     // Get borrower and lender information
     const borrower = borrowerId ? await BorrowerService.getBorrowerById(borrowerId) : null;
-    const lender = lenderId ? await LoanService.getLenderById(lenderId) : null;
+    const lender = lenderId ? await LenderService.getLenderById(lenderId) : null;
 
     if (!borrower) {
       console.error(`[Compliance] Borrower ${borrowerId} not found`);
@@ -54,8 +55,8 @@ export async function handleLoanCreated(event: DomainEvent<any>): Promise<void> 
     // Add lender as signer if available
     if (lender) {
       signers.push({
-        email: lender.email,
-        name: lender.name || lender.email,
+        email: lender.contactEmail,
+        name: lender.name || lender.contactEmail,
         role: "lender",
         order: 2,
       });
@@ -86,7 +87,7 @@ export async function handleInvestorCreated(event: DomainEvent<any>): Promise<vo
 
   try {
     // Get fund details
-    const fund = fundId ? await FundService.getFundById(fundId) : null;
+    const fund = fundId ? await FundService.getFundById(fundId, organizationId) : null;
     if (!fund) {
       console.error(`[Compliance] Fund ${fundId} not found`);
       return;

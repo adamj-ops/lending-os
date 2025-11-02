@@ -19,12 +19,12 @@ export function KYCStatusBadge({ status, showIcon = true }: KYCStatusBadgeProps)
     },
     in_progress: {
       label: "In Progress",
-      variant: "default" as const,
+      variant: "info" as const,
       icon: IconClock,
     },
     approved: {
       label: "Approved",
-      variant: "default" as const,
+      variant: "success" as const,
       icon: IconShieldCheck,
     },
     rejected: {
@@ -34,7 +34,7 @@ export function KYCStatusBadge({ status, showIcon = true }: KYCStatusBadgeProps)
     },
     requires_review: {
       label: "Review Required",
-      variant: "secondary" as const,
+      variant: "warning" as const,
       icon: IconClock,
     },
   };
