@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Search, User, Building2 } from "lucide-react";
+import { IconSearch, IconUser, IconBuilding } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
@@ -74,7 +74,7 @@ export function StepParty() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="size-5" />
+                  <IconUser size={20} stroke={2} className="size-5" />
                   Borrower Details
                 </CardTitle>
               </CardHeader>
@@ -238,7 +238,7 @@ export function StepParty() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building2 className="size-5" />
+                  <IconBuilding size={20} stroke={2} className="size-5" />
                   Investor/Lender Details
                 </CardTitle>
               </CardHeader>
@@ -323,7 +323,7 @@ export function StepParty() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <IconSearch size={20} stroke={2} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name or email..."
                     value={searchTerm}
@@ -346,7 +346,7 @@ export function StepParty() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <IconSearch size={20} stroke={2} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name..."
                     value={searchTerm}

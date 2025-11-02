@@ -1,0 +1,81 @@
+import { NextRequest, NextResponse } from "next/server";
+import { KYCService } from "@/services/kyc.service";
+import { PersonaAdapter, createPersonaAdapter } from "@/integrations/kyc/persona.adapter";
+
+/**
+ * KYC Document Upload API
+ * 
+ * POST /api/v1/borrowers/:id/kyc/documents - Upload documents
+ */
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: borrowerId } = await params;
+    const formData = await request.formData();
+
+    const verificationId = formData.get("verificationId") as string;
+    const documentType = formData.get("documentType") as string;
+    const file = formData.get("file") as File;
+
+    if (!verificationId || !documentType || !file) {
+      return NextResponse.json(
+        { error: "Missing required fields: verificationId, documentType, file" },
+        { status: 400 }
+      );
+    }
+
+    // Get verification
+    const verification = await KYCService.getVerification(verificationId);
+    if (!verification || verification.borrowerId !== borrowerId) {
+      return NextResponse.json(
+        { error: "Verification not found" },
+        { status: 404 }
+      );
+    }
+
+    // TODO: Upload file to S3 and get URL
+    // For now, use placeholder
+    const s3Key = `kyc/${verificationId}/${file.name}`;
+    const fileUrl = `https://s3.amazonaws.com/bucket/${s3Key}`;
+
+    // Upload document to Persona
+    const adapter = createPersonaAdapter({
+      apiKey: process.env.PERSONA_API_KEY || "",
+    });
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    await adapter.uploadDocument(verification.verificationId, {
+      type: documentType,
+      content: fileBuffer,
+      filename: file.name,
+    });
+
+    // Save document record
+    const document = await KYCService.uploadDocument({
+      verificationId,
+      documentType,
+      s3Key,
+      fileUrl,
+    });
+
+    return NextResponse.json(
+      {
+        id: document.id,
+        documentType: document.documentType,
+        fileUrl: document.fileUrl,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("[KYC Documents API] Error:", error);
+    return NextResponse.json(
+      { error: "Failed to upload document" },
+      { status: 500 }
+    );
+  }
+}
+
+

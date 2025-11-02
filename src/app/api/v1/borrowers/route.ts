@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { BorrowerService } from "@/services/borrower.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import { createBorrowerSchema } from "@/lib/validation/borrowers";
 import type { CreateBorrowerDTO } from "@/types/borrower";
 
@@ -11,9 +11,9 @@ import type { CreateBorrowerDTO } from "@/types/borrower";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
 
-    const borrowers = await BorrowerService.getBorrowersByOrganization(session.userId);
+    const borrowers = await BorrowerService.getBorrowersByOrganization(session.organizationId);
 
     return NextResponse.json({
       success: true,
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
     const body = await request.json();
 
     // Validate with Zod
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const borrowerData: CreateBorrowerDTO = {
       ...validationResult.data,
-      organizationId: session.userId,
+      organizationId: session.organizationId,
     };
 
     const borrower = await BorrowerService.createBorrower(borrowerData);

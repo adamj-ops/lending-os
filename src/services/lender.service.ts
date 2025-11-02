@@ -1,6 +1,6 @@
-import { eq, and, sum } from "drizzle-orm";
+import { eq, and, sum, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { lenders, loans, lenderLoans } from "@/db/schema";
+import { lenders, loans, lenderLoans, fundCommitments, fundLoanAllocations } from "@/db/schema";
 import type { CreateLenderDTO, UpdateLenderDTO, Lender } from "@/types/lender";
 import { LenderRole } from "@/types/loan";
 
@@ -216,5 +216,106 @@ export class LenderService {
 
     return result.length;
   }
+
+  /**
+   * Get lender's fund commitments
+   * Returns all fund commitments for a lender (acting as investor)
+   */
+  static async getLenderFundCommitments(lenderId: string) {
+    const result = await db
+      .select()
+      .from(fundCommitments)
+      .where(eq(fundCommitments.lenderId, lenderId));
+
+    return result.map((commitment) => ({
+      ...commitment,
+      committedAmount: parseFloat(commitment.committedAmount),
+      calledAmount: parseFloat(commitment.calledAmount),
+      returnedAmount: parseFloat(commitment.returnedAmount),
+      uncalledAmount: parseFloat(commitment.committedAmount) - parseFloat(commitment.calledAmount),
+      netPosition: parseFloat(commitment.calledAmount) - parseFloat(commitment.returnedAmount),
+    }));
+  }
+
+  /**
+   * Get lender's portfolio (aggregate view of all investments)
+   * Combines direct loan participations AND fund commitments
+   */
+  static async getLenderPortfolio(lenderId: string) {
+    // Get direct loan participations
+    const loanParticipations = await this.getLenderParticipation(lenderId);
+
+    // Get fund commitments
+    const fundCommitmentsData = await this.getLenderFundCommitments(lenderId);
+
+    // Calculate fund investment totals
+    const totalFundCommitments = fundCommitmentsData.reduce(
+      (sum, c) => sum + c.committedAmount,
+      0
+    );
+    const totalFundCalled = fundCommitmentsData.reduce((sum, c) => sum + c.calledAmount, 0);
+    const totalFundReturned = fundCommitmentsData.reduce(
+      (sum, c) => sum + c.returnedAmount,
+      0
+    );
+
+    // Get fund-backed loan allocations (loans funded through funds this lender invested in)
+    const fundBackedLoans = await db
+      .select({
+        loanId: fundLoanAllocations.loanId,
+        allocatedAmount: fundLoanAllocations.allocatedAmount,
+        returnedAmount: fundLoanAllocations.returnedAmount,
+        fundId: fundLoanAllocations.fundId,
+      })
+      .from(fundLoanAllocations)
+      .innerJoin(
+        fundCommitments,
+        eq(fundLoanAllocations.fundId, fundCommitments.fundId)
+      )
+      .where(eq(fundCommitments.lenderId, lenderId));
+
+    return {
+      // Direct loan investments
+      directLoans: {
+        count: loanParticipations.totalLoans,
+        totalExposure: loanParticipations.totalPrincipal,
+        averageParticipation: loanParticipations.averageParticipation,
+        loans: loanParticipations.participations,
+      },
+
+      // Fund investments
+      fundInvestments: {
+        count: fundCommitmentsData.length,
+        totalCommitted: totalFundCommitments,
+        totalCalled: totalFundCalled,
+        totalReturned: totalFundReturned,
+        uncalledCapital: totalFundCommitments - totalFundCalled,
+        netDeployed: totalFundCalled - totalFundReturned,
+        commitments: fundCommitmentsData,
+      },
+
+      // Fund-backed loans (indirect exposure through funds)
+      fundBackedLoans: {
+        count: fundBackedLoans.length,
+        loans: fundBackedLoans.map((loan) => ({
+          ...loan,
+          allocatedAmount: parseFloat(loan.allocatedAmount),
+          returnedAmount: parseFloat(loan.returnedAmount),
+          outstandingAmount:
+            parseFloat(loan.allocatedAmount) - parseFloat(loan.returnedAmount),
+        })),
+      },
+
+      // Portfolio totals
+      totals: {
+        totalInvestments: loanParticipations.totalLoans + fundCommitmentsData.length,
+        totalExposure:
+          loanParticipations.totalPrincipal + (totalFundCalled - totalFundReturned),
+        directExposure: loanParticipations.totalPrincipal,
+        fundExposure: totalFundCalled - totalFundReturned,
+      },
+    };
+  }
 }
+
 

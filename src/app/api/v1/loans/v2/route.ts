@@ -4,6 +4,7 @@ import { loans, borrowers, lenders, properties, loanTerms, collateral, loanDocum
 import { CreateLoanSchema } from "@/features/loan-builder/schemas";
 import { LoanDocumentType } from "@/types/loan-document";
 import { BorrowerRole, LenderRole } from "@/types/loan";
+import { requireOrganization } from "@/lib/clerk-server";
 
 /**
  * POST /api/v1/loans/v2
@@ -12,6 +13,9 @@ import { BorrowerRole, LenderRole } from "@/types/loan";
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication and get organization context
+    const session = await requireOrganization();
+
     const body = await request.json();
 
     // Validate with Zod
@@ -29,9 +33,8 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data;
 
-    // TODO: Get from session
-    const organizationId = "550e8400-e29b-41d4-a716-446655440000";
-    const createdBy = "550e8400-e29b-41d4-a716-446655440000";
+    const organizationId = session.organizationId;
+    const createdBy = session.userId;
 
     // ============ CREATE ENTITIES BASED ON CATEGORY ============
 
@@ -195,7 +198,7 @@ export async function POST(request: NextRequest) {
           fileName: doc.name,
           fileUrl: doc.url,
           fileSize: doc.size.toString(),
-          uploadedBy: "Wizard v2",
+          uploadedBy: session.userId,
         });
       }
     }

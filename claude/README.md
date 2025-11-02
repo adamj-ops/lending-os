@@ -57,7 +57,7 @@ npm run generate:presets  # Generate CSS theme presets
 - **Fonts:** Open Sans (primary), Geist Mono (monospace)
 
 ### Explicitly Forbidden Without Approval
-- NextAuth, Clerk, Auth0, Better Auth
+- Clerk (current)
 - Prisma, TypeORM, Kysely
 - Material UI, Chakra, Bootstrap, Ant Design
 - Redux, MobX, Recoil

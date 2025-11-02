@@ -1,7 +1,7 @@
 "use client";
 
 import { Table } from "@tanstack/react-table";
-import { Settings2 } from "lucide-react";
+import { IconSettings2 } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
-          <Settings2 />
+          <IconSettings2 size={20} stroke={2} />
           View
         </Button>
       </DropdownMenuTrigger>

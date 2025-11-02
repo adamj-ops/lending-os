@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -149,7 +149,7 @@ export function StepCollateral() {
                     size="icon"
                     onClick={() => remove(index)}
                   >
-                    <Trash2 className="size-4 text-destructive" />
+                    <IconTrash size={20} stroke={2} className="size-4 text-destructive" />
                   </Button>
                 </div>
               ))}
@@ -161,7 +161,7 @@ export function StepCollateral() {
               size="sm"
               onClick={() => append({ n: fields.length + 1, amount: 0, note: "" })}
             >
-              <Plus className="mr-2 size-4" />
+              <IconPlus size={20} stroke={2} className="mr-2 size-4" />
               Add Draw
             </Button>
 

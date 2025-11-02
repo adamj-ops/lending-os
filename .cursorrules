@@ -1,0 +1,84 @@
+# Cursor Agent Rules - Lending OS
+
+## 🚨 CRITICAL: UI Standards Enforcement
+
+### BEFORE working on ANY UI component, you MUST:
+
+1. **Check pending work**: Read `.cursor/rules/pending-ui-improvements.md`
+   - If the file you're editing is listed there, REFACTOR it while working on it
+   - Don't just add code, fix the underlying pattern
+
+2. **Follow UI standards**: Read `.cursor/rules/ui-standards.md`
+   - NEVER use `fetch` + `useEffect` → Use hooks from `src/hooks/`
+   - NEVER create custom loading UI → Use `<PageLoader>` from `src/components/shared`
+   - NEVER hardcode colors → Use semantic tokens (`text-foreground`, not `text-gray-900`)
+
+3. **Use templates**: Check `.cursor/templates/` before creating new features
+   - New hooks: Use `custom-hook.template.ts`
+   - New pages: Use `dashboard-page.template.tsx`
+   - New stories: Use `component.stories.template.tsx`
+
+### Quick Reference
+
+**Available hooks** (use these instead of fetch):
+- `useLoans`, `useBorrowers`, `useLenders`, `useFunds`
+- `useInspections`, `usePayments`, `useDraws`, `useAlerts`
+- `useAnalytics`, `useProperties`
+
+**Available components** (use these for states):
+- `<PageLoader>` - Loading/error/empty wrapper (USE THIS!)
+- `<LoadingSpinner>` - Inline loading
+- `<ErrorState>` - Error display
+- `<EmptyState>` - Empty data
+- `<CardSkeleton>` - Loading cards
+- `<DashboardLayout>` - Dashboard wrapper
+- `<MetricCard>` - Metric cards
+
+**Semantic tokens** (use these for colors):
+- `text-foreground` (not `text-gray-900`)
+- `text-muted-foreground` (not `text-gray-600`)
+- `bg-background` (not `bg-white`)
+- `bg-muted` (not `bg-gray-100`)
+- `border-border` (not `border-gray-200`)
+
+### Example: Correct Pattern
+
+```tsx
+import { useLoans } from "@/hooks/useLoans";
+import { PageLoader } from "@/components/shared";
+
+function LoansPage() {
+  const { data, isLoading, error, refetch } = useLoans();
+
+  return (
+    <PageLoader isLoading={isLoading} error={error} isEmpty={!data?.length} onRetry={refetch}>
+      <div className="grid gap-6">
+        {data.map(loan => (
+          <div key={loan.id} className="p-4 border-border bg-background rounded-lg">
+            <h3 className="text-foreground font-semibold">{loan.title}</h3>
+            <p className="text-muted-foreground">{loan.description}</p>
+          </div>
+        ))}
+      </div>
+    </PageLoader>
+  );
+}
+```
+
+## 📚 Full Documentation
+
+- **Complete guide**: `.cursor/rules/ui-standards.md`
+- **Pending work**: `.cursor/rules/pending-ui-improvements.md`
+- **Quick start**: `UI-STANDARDS-QUICKSTART.md`
+- **Frontend rules**: `.cursor/rules/frontend.md`
+- **Tech stack**: `.cursor/rules/tech-stack-lock.md`
+- **Templates**: `.cursor/templates/`
+
+## 🎯 When in Doubt
+
+1. Check if similar code exists (especially `useFunds.ts` and funds page)
+2. Check documentation above
+3. Use templates from `.cursor/templates/`
+4. Ask user if truly unclear
+
+**Remember: Consistency > Cleverness. Follow existing patterns.**

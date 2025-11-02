@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { IconCheck, IconLoader2 } from "@tabler/icons-react";
+import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,7 +65,7 @@ export function BorrowerLoanSelector({ borrowerId, onSuccess }: BorrowerLoanSele
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-4">
-        <Loader2 className="size-4 animate-spin" />
+        <IconLoader2 size={20} stroke={2} className="size-4 animate-spin" />
       </div>
     );
   }
@@ -104,8 +105,7 @@ export function BorrowerLoanSelector({ borrowerId, onSuccess }: BorrowerLoanSele
                     value={loan.id}
                     onSelect={() => handleToggleLoan(loan.id)}
                   >
-                    <Check
-                      className={cn(
+                    <IconCheck size={20} stroke={2} className={cn(
                         "mr-2 size-4",
                         selectedLoanIds.includes(loan.id) ? "opacity-100" : "opacity-0"
                       )}

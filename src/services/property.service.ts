@@ -45,9 +45,17 @@ export class PropertyService {
   }
 
   /**
-   * Get all properties
+   * Get all properties for an organization
    */
-  static async getProperties(): Promise<Property[]> {
+  static async getProperties(organizationId?: string): Promise<Property[]> {
+    if (organizationId) {
+      const result = await db
+        .select()
+        .from(properties)
+        .where(eq(properties.organizationId, organizationId));
+      return result as Property[];
+    }
+    // Fallback to all properties if no org specified (for backward compatibility)
     const result = await db.select().from(properties);
     return result as Property[];
   }

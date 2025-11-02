@@ -15,7 +15,7 @@ This file tracks the current state of the Lending OS project for Claude Code.
 ## What's Complete ✅
 
 ### Sprint 1 (Completed)
-- Authentication system (iron-session)
+- Authentication system (Clerk - migrated from BetterAuth)
 - Database setup (Neon Postgres + Drizzle ORM)
 - Basic loan CRUD operations
 - Portfolio dashboard (basic version)
@@ -63,9 +63,14 @@ This file tracks the current state of the Lending OS project for Claude Code.
 ## Known Issues & Decisions
 
 ### Authentication
-- **Decision:** Using iron-session instead of BetterAuth
-- **Reason:** BetterAuth had Next.js 16 compatibility issues
-- **Status:** Working, stable
+- **System:** Clerk (fully migrated November 2024)
+- **Previous:** BetterAuth (deprecated - had login/FK violation issues)
+- **Features:** 
+  - Webhook sync (user.created, user.updated, user.deleted)
+  - Defensive bootstrapping (auto-creates users in app_users)
+  - Email verification flow
+  - Organization setup
+- **Status:** ✅ Production-ready, stable
 
 ### Database
 - **Current Setup:** Neon Postgres serverless

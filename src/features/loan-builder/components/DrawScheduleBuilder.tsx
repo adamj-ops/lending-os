@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,7 +75,7 @@ export function DrawScheduleBuilder({ draws, onChange }: DrawScheduleBuilderProp
               size="icon"
               onClick={() => removeDraw(index)}
             >
-              <Trash2 className="size-4 text-destructive" />
+              <IconTrash size={20} stroke={2} className="size-4 text-destructive" />
             </Button>
           </div>
         ))}
@@ -83,7 +83,7 @@ export function DrawScheduleBuilder({ draws, onChange }: DrawScheduleBuilderProp
 
       <div className="flex items-center justify-between">
         <Button type="button" variant="outline" size="sm" onClick={addDraw}>
-          <Plus className="mr-2 size-4" />
+          <IconPlus size={20} stroke={2} className="mr-2 size-4" />
           Add Draw
         </Button>
 

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generatePresignedUrl } from "@/lib/s3-upload";
+import { requireOrganization } from "@/lib/clerk-server";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await requireOrganization();
     const body = await request.json();
     const { fileName, fileType, folder } = body;
 
@@ -13,7 +15,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await generatePresignedUrl(fileName, fileType, folder);
+    // Generate presigned URL with organization context
+    // Files will be organized by organizationId in S3
+    const folderPath = folder ? `${session.organizationId}/${folder}` : session.organizationId;
+    const data = await generatePresignedUrl(fileName, fileType, folderPath);
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PropertyService } from "@/services/property.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { UpdatePropertyDTO } from "@/types/property";
 
 /**
@@ -9,12 +9,17 @@ import type { UpdatePropertyDTO } from "@/types/property";
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const property = await PropertyService.getPropertyById(id);
 
     if (!property) {
+      return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
+    }
+
+    // Verify property belongs to user's organization
+    if (property.organizationId !== session.organizationId) {
       return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
     }
 
@@ -38,16 +43,24 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const body: UpdatePropertyDTO = await request.json();
 
     const { id } = await params;
-    const property = await PropertyService.updateProperty(id, body);
 
-    if (!property) {
+    // Get property first to verify ownership
+    const existingProperty = await PropertyService.getPropertyById(id);
+    if (!existingProperty) {
       return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
     }
+
+    // Verify property belongs to user's organization
+    if (existingProperty.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
+    }
+
+    const property = await PropertyService.updateProperty(id, body);
 
     return NextResponse.json({
       success: true,
@@ -69,14 +82,22 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
-    const success = await PropertyService.deleteProperty(id);
 
-    if (!success) {
+    // Get property first to verify ownership
+    const property = await PropertyService.getPropertyById(id);
+    if (!property) {
       return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
     }
+
+    // Verify property belongs to user's organization
+    if (property.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Property not found" }, { status: 404 });
+    }
+
+    const success = await PropertyService.deleteProperty(id);
 
     return NextResponse.json({
       success: true,

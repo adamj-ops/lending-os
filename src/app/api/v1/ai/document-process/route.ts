@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processLoanDocument } from "@/lib/ai/utils";
+import { requireOrganization } from "@/lib/clerk-server";
 import { z } from "zod";
 
 const documentProcessingSchema = z.object({
@@ -22,6 +23,9 @@ const documentProcessingSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication to prevent unauthorized AI usage
+    const session = await requireOrganization();
+
     const body = await request.json();
     const { documentText, documentType } = documentProcessingSchema.parse(body);
 
@@ -43,7 +47,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error processing document:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {

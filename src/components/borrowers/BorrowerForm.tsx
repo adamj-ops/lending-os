@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 import {
   Form,
   FormControl,
@@ -285,7 +285,7 @@ export function BorrowerForm({ borrower, onSuccess }: BorrowerFormProps) {
             Cancel
           </Button>
           <Button type="submit" disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {isPending && <IconLoader2 size={20} stroke={2} className="mr-2 size-4 animate-spin" />}
             {isEditing ? "Update" : "Create"} Borrower
           </Button>
         </div>

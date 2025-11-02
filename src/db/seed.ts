@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 
 // Load environment variables from .env.local
 config({ path: ".env.local" });
@@ -36,7 +36,19 @@ async function seed() {
         name: "admin",
         description: "Full access to all features",
       })
+      .onConflictDoNothing()
       .returning();
+
+    // If adminRole is undefined, get it from the database
+    let adminRoleId = adminRole?.id;
+    if (!adminRoleId) {
+      const existingAdminRole = await db
+        .select()
+        .from(schema.roles)
+        .where(eq(schema.roles.name, "admin"))
+        .limit(1);
+      adminRoleId = existingAdminRole[0]?.id;
+    }
 
     const [managerRole] = await db
       .insert(schema.roles)
@@ -44,6 +56,7 @@ async function seed() {
         name: "manager",
         description: "Can create/edit loans, view reports",
       })
+      .onConflictDoNothing()
       .returning();
 
     const [analystRole] = await db
@@ -52,26 +65,39 @@ async function seed() {
         name: "analyst",
         description: "Read-only access to reports and data",
       })
+      .onConflictDoNothing()
       .returning();
 
-    // Create test user
-    console.log("Creating test user...");
-    const hashedPassword = await bcrypt.hash("password123", 10);
+    // NOTE: User creation is now handled by Clerk
+    // This seed script assumes a user already exists in Clerk with email "admin@lendingos.com"
+    // For seeding, you should:
+    // 1. Create user in Clerk Dashboard or via Clerk API
+    // 2. Get the Clerk user ID
+    // 3. Use that ID for userId below
     
-    const [user] = await db
-      .insert(schema.users)
-      .values({
-        email: "admin@lendingos.com",
-        name: "Admin User",
-        hashedPassword: hashedPassword,
-        emailVerified: false,
-      })
-      .returning();
+    // For now, we'll use a placeholder - actual seeding should use Clerk user IDs
+    console.log("NOTE: Seed script assumes user exists in Clerk with email admin@lendingos.com");
+    console.log("Create the user in Clerk Dashboard first, then update this script with the Clerk user ID");
+    
+    // Placeholder - replace with actual Clerk user ID after creating user in Clerk
+    const clerkUserId = `user_clerk_placeholder_${Date.now()}`;
+    
+    const appUser = await db.query.appUsers.findFirst({
+      where: eq(schema.appUsers.email, "admin@lendingos.com"),
+    });
+
+    if (!appUser) {
+      throw new Error(
+        "Seed requires an existing Clerk user with email admin@lendingos.com. Create it first and re-run.",
+      );
+    }
+
+    const userId = appUser.id;
 
     // Link user to organization
     console.log("Linking user to organization...");
     await db.insert(schema.userOrganizations).values({
-      userId: user.id,
+      userId: userId,
       organizationId: organization.id,
       role: "admin",
     });
@@ -79,8 +105,8 @@ async function seed() {
     // Assign admin role
     console.log("Assigning admin role...");
     await db.insert(schema.userRoles).values({
-      userId: user.id,
-      roleId: adminRole.id,
+      userId: userId,
+      roleId: adminRoleId,
     });
 
     // Create sample borrowers

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { forecastLoan } from "@/lib/ai/forecast";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { ForecastInput } from "@/types/forecast";
 
 /**
@@ -9,6 +10,8 @@ import type { ForecastInput } from "@/types/forecast";
  */
 export async function POST(request: NextRequest) {
   try {
+    const session = await requireOrganization();
+
     const body: ForecastInput = await request.json();
 
     // Validate required fields
@@ -29,6 +32,10 @@ export async function POST(request: NextRequest) {
       data: forecast,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     console.error("Error generating forecast:", error);
     return NextResponse.json(
       {

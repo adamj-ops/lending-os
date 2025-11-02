@@ -21,6 +21,9 @@ export interface Borrower {
   creditScore: number | null;
   taxIdEncrypted: string | null; // Encrypted SSN/EIN (v2)
   
+  // KYC Status (Sprint 6)
+  kycStatus?: "pending" | "in_progress" | "approved" | "rejected" | "requires_review" | null;
+  
   // Backward compatibility
   companyName: string | null; // Deprecated: use name for entities
   

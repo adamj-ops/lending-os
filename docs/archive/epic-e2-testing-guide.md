@@ -1007,7 +1007,7 @@ export const loanFixtures = {
 **Setup Example:**
 
 ```typescript
-// vitest.config.ts
+// vitest.config.mts
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 

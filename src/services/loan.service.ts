@@ -6,6 +6,7 @@ import type { LoanDocument, CreateLoanDocumentDTO } from "@/types/loan-document"
 import type { LoanNote, CreateLoanNoteDTO, UpdateLoanNoteDTO } from "@/types/loan-note";
 import { LoanStatus, BorrowerRole, LenderRole } from "@/types/loan";
 import { canTransition } from "@/lib/loan-state-machine";
+import { eventBus, EventTypes, LoanCreatedPayload, LoanFundedPayload, LoanStatusChangedPayload } from "@/lib/events";
 
 export class LoanService {
   /**
@@ -62,6 +63,30 @@ export class LoanService {
         percentage: "100", // Primary lender has 100% by default
       }).onConflictDoNothing();
     }
+
+    // Publish Loan.Created event
+    await eventBus.publish<LoanCreatedPayload>({
+      eventType: EventTypes.LOAN_CREATED,
+      eventVersion: '1.0',
+      aggregateId: loan.id,
+      aggregateType: 'Loan',
+      payload: {
+        loanId: loan.id,
+        organizationId: loan.organizationId,
+        borrowerId: loan.borrowerId ?? undefined,
+        lenderId: loan.lenderId ?? undefined,
+        principal: loan.principal,
+        rate: loan.rate,
+        termMonths: loan.termMonths,
+        loanCategory: loan.loanCategory,
+        createdBy: loan.createdBy ?? undefined,
+      },
+      metadata: {
+        organizationId: loan.organizationId,
+        userId: data.createdBy,
+        source: 'LoanService.createLoan',
+      },
+    });
 
     return loan as Loan;
   }
@@ -219,7 +244,8 @@ export class LoanService {
    */
   static async transitionLoanStatus(
     id: string,
-    newStatus: LoanStatus
+    newStatus: LoanStatus,
+    userId?: string
   ): Promise<Loan | null> {
     // Get current loan
     const loan = await this.getLoanById(id);
@@ -233,16 +259,69 @@ export class LoanService {
       );
     }
 
-    // Update status
+    // Update status and set fundedDate if transitioning to funded
+    const updateData: Record<string, unknown> = {
+      status: newStatus,
+      statusChangedAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    if (newStatus === 'funded' && !loan.fundedDate) {
+      updateData.fundedDate = new Date();
+    }
+
     const [updatedLoan] = await db
       .update(loans)
-      .set({
-        status: newStatus,
-        statusChangedAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(loans.id, id))
       .returning();
+
+    // Publish Loan.StatusChanged event
+    await eventBus.publish<LoanStatusChangedPayload>({
+      eventType: EventTypes.LOAN_STATUS_CHANGED,
+      eventVersion: '1.0',
+      aggregateId: updatedLoan.id,
+      aggregateType: 'Loan',
+      payload: {
+        loanId: updatedLoan.id,
+        organizationId: updatedLoan.organizationId,
+        previousStatus: currentStatus,
+        newStatus,
+        changedBy: userId,
+      },
+      metadata: {
+        organizationId: updatedLoan.organizationId,
+        userId,
+        source: 'LoanService.transitionLoanStatus',
+      },
+    });
+
+    // If transitioning to funded, publish Loan.Funded event
+    if (newStatus === 'funded') {
+      await eventBus.publish<LoanFundedPayload>({
+        eventType: EventTypes.LOAN_FUNDED,
+        eventVersion: '1.0',
+        aggregateId: updatedLoan.id,
+        aggregateType: 'Loan',
+        payload: {
+          loanId: updatedLoan.id,
+          organizationId: updatedLoan.organizationId,
+          principal: updatedLoan.principal,
+          rate: updatedLoan.rate,
+          termMonths: updatedLoan.termMonths,
+          paymentType: updatedLoan.paymentType,
+          paymentFrequency: updatedLoan.paymentFrequency,
+          fundedDate: updatedLoan.fundedDate!,
+          maturityDate: updatedLoan.maturityDate ?? undefined,
+          fundedBy: userId,
+        },
+        metadata: {
+          organizationId: updatedLoan.organizationId,
+          userId,
+          source: 'LoanService.transitionLoanStatus',
+        },
+      });
+    }
 
     return updatedLoan as Loan;
   }

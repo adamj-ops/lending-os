@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { TrendingUp, AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { IconTrendingUp, IconAlertTriangle, IconCircleCheck, IconSparkles } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -89,7 +89,7 @@ export function StepForecast() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <Sparkles className="mt-1 size-6 text-primary" />
+        <IconSparkles size={24} stroke={2} className="mt-1 size-6 text-primary" />
         <div>
           <h2 className="mb-2 text-2xl font-bold">AI Risk & Forecast Analysis</h2>
           <p className="text-muted-foreground">
@@ -109,7 +109,7 @@ export function StepForecast() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="size-5" />
+                <IconTrendingUp size={20} stroke={2} className="size-5" />
                 Projected Return
               </CardTitle>
             </CardHeader>
@@ -146,7 +146,7 @@ export function StepForecast() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="size-5" />
+                <IconAlertTriangle size={20} stroke={2} className="size-5" />
                 Risk Assessment
               </CardTitle>
             </CardHeader>
@@ -174,7 +174,7 @@ export function StepForecast() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="size-5" />
+                <IconCircleCheck size={20} stroke={2} className="size-5" />
                 Yield Efficiency Score
               </CardTitle>
             </CardHeader>

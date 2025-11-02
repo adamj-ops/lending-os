@@ -39,6 +39,9 @@ export const borrowers = pgTable("borrowers", {
   creditScore: integer("credit_score"),
   taxIdEncrypted: text("tax_id_encrypted"), // v2: KMS field for future
 
+  // KYC Status (Sprint 6 - Phase 2)
+  kycStatus: text("kyc_status").default("pending"), // pending, in_progress, approved, rejected, requires_review
+
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LenderService } from "@/services/lender.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import { updateLenderSchema } from "@/lib/validation/lenders";
 import type { UpdateLenderDTO } from "@/types/lender";
 
@@ -10,12 +10,17 @@ import type { UpdateLenderDTO } from "@/types/lender";
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const lender = await LenderService.getLenderById(id);
 
     if (!lender) {
+      return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
+    }
+
+    // Verify lender belongs to user's organization
+    if (lender.organizationId !== session.organizationId) {
       return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
     }
 
@@ -39,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const body = await request.json();
@@ -57,11 +62,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       );
     }
 
-    const lender = await LenderService.updateLender(id, validationResult.data);
-
-    if (!lender) {
+    // Get lender first to verify ownership
+    const existingLender = await LenderService.getLenderById(id);
+    if (!existingLender) {
       return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
     }
+
+    // Verify lender belongs to user's organization
+    if (existingLender.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
+    }
+
+    const lender = await LenderService.updateLender(id, validationResult.data);
 
     return NextResponse.json({
       success: true,
@@ -83,14 +95,22 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
-    const success = await LenderService.deleteLender(id);
 
-    if (!success) {
+    // Get lender first to verify ownership
+    const lender = await LenderService.getLenderById(id);
+    if (!lender) {
       return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
     }
+
+    // Verify lender belongs to user's organization
+    if (lender.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Lender not found" }, { status: 404 });
+    }
+
+    const success = await LenderService.deleteLender(id);
 
     return NextResponse.json({
       success: true,

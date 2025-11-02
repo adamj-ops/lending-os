@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+# Treat common doc folders as documentation for linguist
+docs/** linguist-documentation
+.cursor/** linguist-vendored
+

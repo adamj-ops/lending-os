@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { RelationshipService } from "@/services/relationship.service";
-import { requireAuth } from "@/lib/session";
+import { BorrowerService } from "@/services/borrower.service";
+import { requireOrganization } from "@/lib/clerk-server";
 
 const syncLoansSchema = z.object({
   loanIds: z.array(z.string()),
@@ -16,9 +17,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
+
+    // Verify borrower belongs to user's organization
+    const borrower = await BorrowerService.getBorrowerById(id);
+    if (!borrower || borrower.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
+    }
+
     const loans = await RelationshipService.getBorrowerLoans(id);
 
     return NextResponse.json({
@@ -45,10 +53,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const body = await request.json();
+
+    // Verify borrower belongs to user's organization
+    const borrower = await BorrowerService.getBorrowerById(id);
+    if (!borrower || borrower.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
+    }
 
     // Validate with Zod
     const validationResult = syncLoansSchema.safeParse(body);

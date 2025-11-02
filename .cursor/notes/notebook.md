@@ -50,6 +50,30 @@ For a lending operating system, we'll need to focus on:
 - Husky for git hooks
 - Tailwind CSS for styling
 
+## Monetization Strategy Integration (January 2025)
+
+**Status**: Documentation complete, implementation planned for Sprint 9-11
+
+**Key Findings**:
+- Current state: Fee infrastructure exists (loan fees, fund fees) but not monetized
+- Gaps: No payment processor, subscription system, listing fees, waterfall calculations, affiliate tracking, white-label licensing
+- Implementation roadmap: 5 phases over Sprint 9-11
+  - Phase 1: Stripe + Subscriptions (Sprint 9)
+  - Phase 2: Transaction & Listing Fees (Sprint 10)
+  - Phase 3: Fund Fee Waterfall (Sprint 10)
+  - Phase 4: Affiliate & Advisory (Sprint 11)
+  - Phase 5: White-Label Licensing (Sprint 11)
+
+**Documentation Created**:
+- `.cursor/docs/architecture/monetization-strategy.md` - Complete monetization strategy
+- Updated sprint roadmap (Sprint 9-11)
+- Updated domain architecture with monetization cross-cutting concern
+- Updated fund domain with fee waterfall references
+
+**Next Steps**: Begin Sprint 9 planning with Stripe integration and subscription system design.
+
+---
+
 ## Sprint 3 Phase 1 Key Learnings (October 26, 2025)
 
 ### Drizzle Date Field Handling

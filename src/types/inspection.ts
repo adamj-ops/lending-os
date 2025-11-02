@@ -31,19 +31,11 @@ export interface UpdateInspectionDTO {
   status?: InspectionStatus;
 }
 
-export enum InspectionStatus {
-  SCHEDULED = 'scheduled',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-}
-
-export enum InspectionType {
-  QUALITY = 'quality',
-  SAFETY = 'safety',
-  COMPLIANCE = 'compliance',
-  PROGRESS = 'progress',
-  FINAL = 'final',
-  OTHER = 'other',
-}
+// Import types from the canonical source (database schema)
+import {
+  InspectionStatusValues,
+  InspectionTypeValues,
+  type InspectionStatus,
+  type InspectionType,
+} from '@/db/schema/draws';
+export type { InspectionStatus, InspectionType };

@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoanService } from "@/services/loan.service";
 import { deleteFromS3, extractFileKeyFromUrl } from "@/lib/s3-upload";
+import { requireOrganization } from "@/lib/clerk-server";
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; docId: string }> }
 ) {
   try {
-    const { docId } = await params;
+    const session = await requireOrganization();
+    const { id: loanId, docId } = await params;
+
+    // Verify loan belongs to user's organization
+    const loan = await LoanService.getLoanById(loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
 
     // Get document to extract file key
-    const documents = await LoanService.getDocuments((await params).id);
+    const documents = await LoanService.getDocuments(loanId);
     const document = documents.find((d) => d.id === docId);
 
     if (document) {

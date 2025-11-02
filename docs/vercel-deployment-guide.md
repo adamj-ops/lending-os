@@ -18,9 +18,10 @@ DATABASE_URL=postgresql://username:password@host:port/database
 NEON_DATABASE_URL=postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb
 ```
 
-#### Session Configuration
+#### Clerk Authentication Configuration
 ```
-SESSION_SECRET=your-super-secret-session-key-here
+CLERK_SECRET_KEY=sk_live_... # Get from Clerk Dashboard
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_... # Get from Clerk Dashboard
 ```
 
 #### AWS S3 Configuration

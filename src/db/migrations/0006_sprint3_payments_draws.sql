@@ -1,2 +1,0 @@
-ALTER TABLE "payment_schedules" ALTER COLUMN "payment_frequency" SET DATA TYPE "public"."payment_frequency" USING "payment_frequency"::"public"."payment_frequency";--> statement-breakpoint
-ALTER TABLE "payments" ALTER COLUMN "payment_type" SET DATA TYPE text;

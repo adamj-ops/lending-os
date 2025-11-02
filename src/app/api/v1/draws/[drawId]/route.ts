@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DrawService } from "@/services/draw.service";
+import { LoanService } from "@/services/loan.service";
+import { requireOrganization } from "@/lib/clerk-server";
 
 /**
  * GET /api/v1/draws/:drawId
@@ -10,6 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ drawId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { drawId } = await params;
 
     const draw = await DrawService.getDraw(drawId);
@@ -17,6 +20,21 @@ export async function GET(
     if (!draw) {
       return NextResponse.json(
         { success: false, error: "Draw not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the draw's loan belongs to user's organization
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found or access denied" },
         { status: 404 }
       );
     }
@@ -47,10 +65,35 @@ export async function PUT(
   { params }: { params: Promise<{ drawId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { drawId } = await params;
     const body = await request.json();
 
-    const draw = await DrawService.updateDraw(drawId, {
+    // Get draw first
+    const draw = await DrawService.getDraw(drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the draw's loan belongs to user's organization
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const updatedDraw = await DrawService.updateDraw(drawId, {
       amountRequested: body.amountRequested,
       workDescription: body.workDescription,
       budgetLineItem: body.budgetLineItem,
@@ -61,7 +104,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: draw,
+      data: updatedDraw,
     });
   } catch (error) {
     console.error("Error updating draw:", error);
@@ -85,7 +128,32 @@ export async function DELETE(
   { params }: { params: Promise<{ drawId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { drawId } = await params;
+
+    // Get draw first
+    const draw = await DrawService.getDraw(drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the draw's loan belongs to user's organization
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found or access denied" },
+        { status: 404 }
+      );
+    }
 
     await DrawService.deleteDraw(drawId);
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoanService } from "@/services/loan.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import { LoanStatus } from "@/types/loan";
 
 /**
@@ -9,7 +9,7 @@ import { LoanStatus } from "@/types/loan";
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const body = await request.json();
     const { status } = body;
@@ -36,11 +36,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const { id } = await params;
-    const loan = await LoanService.transitionLoanStatus(id, status);
 
-    if (!loan) {
+    // Verify loan belongs to user's organization before updating status
+    const existingLoan = await LoanService.getLoanById(id);
+    if (!existingLoan) {
       return NextResponse.json({ success: false, error: "Loan not found" }, { status: 404 });
     }
+
+    const loan = await LoanService.transitionLoanStatus(id, status);
 
     return NextResponse.json({
       success: true,

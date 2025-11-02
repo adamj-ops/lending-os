@@ -25,3 +25,11 @@ export async function getPreference<T extends string>(key: string, allowed: read
   const value = cookie ? cookie.value.trim() : undefined;
   return allowed.includes(value as T) ? (value as T) : fallback;
 }
+
+export async function setPreference(key: string, value: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(key, value, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  });
+}

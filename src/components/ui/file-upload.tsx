@@ -1,271 +1,200 @@
-"use client";
-
-import { useCallback, useState } from "react";
-import { Upload, X, File, Image as ImageIcon } from "lucide-react";
-import { Button } from "./button";
-import { Progress } from "./progress";
 import { cn } from "@/lib/utils";
+import React, { useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { IconUpload } from "@tabler/icons-react";
+import { useDropzone } from "react-dropzone";
 
 export interface UploadedFile {
+  file: File;
+  url: string;
   name: string;
   size: number;
-  type: string;
-  url: string;
-  key: string;
 }
 
-interface FileUploadProps {
-  onUpload: (files: UploadedFile[]) => void;
-  maxFiles?: number;
-  maxSize?: number; // in MB
-  acceptedTypes?: string[];
-  folder?: string;
-  className?: string;
-}
+const mainVariant = {
+  initial: {
+    x: 0,
+    y: 0,
+  },
+  animate: {
+    x: 20,
+    y: -20,
+    opacity: 0.9,
+  },
+};
 
-export function FileUpload({
-  onUpload,
-  maxFiles = 5,
-  maxSize = 10,
-  acceptedTypes = ["image/*", "application/pdf", ".doc", ".docx"],
-  folder = "uploads",
-  className,
-}: FileUploadProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadingFiles, setUploadingFiles] = useState<
-    Array<{ name: string; progress: number }>
-  >([]);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [error, setError] = useState<string | null>(null);
+const secondaryVariant = {
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+  },
+};
 
-  const uploadFile = async (file: File) => {
-    try {
-      // Get presigned URL
-      const response = await fetch("/api/v1/uploads/sign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          folder,
-        }),
-      });
+export const FileUpload = ({
+  onChange,
+}: {
+  onChange?: (files: File[]) => void;
+}) => {
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-      if (!response.ok) throw new Error("Failed to get upload URL");
-
-      const { data } = await response.json();
-      const { uploadUrl, publicUrl, fileKey } = data;
-
-      // Upload file to S3
-      setUploadingFiles((prev) => [...prev, { name: file.name, progress: 0 }]);
-
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable) {
-          const progress = Math.round((e.loaded / e.total) * 100);
-          setUploadingFiles((prev) =>
-            prev.map((f) => (f.name === file.name ? { ...f, progress } : f))
-          );
-        }
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        xhr.addEventListener("load", () => {
-          if (xhr.status === 200) {
-            resolve();
-          } else {
-            reject(new Error("Upload failed"));
-          }
-        });
-
-        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
-      });
-
-      // Remove from uploading and add to uploaded
-      setUploadingFiles((prev) => prev.filter((f) => f.name !== file.name));
-
-      const uploadedFile: UploadedFile = {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: publicUrl,
-        key: fileKey,
-      };
-
-      setUploadedFiles((prev) => {
-        const newFiles = [...prev, uploadedFile];
-        onUpload(newFiles);
-        return newFiles;
-      });
-    } catch (err) {
-      setUploadingFiles((prev) => prev.filter((f) => f.name !== file.name));
-      setError(`Failed to upload ${file.name}`);
-      console.error("Upload error:", err);
-    }
+  const handleFileChange = (newFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    onChange && onChange(newFiles);
   };
 
-  const handleFiles = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
 
-      setError(null);
-
-      const fileArray = Array.from(files);
-
-      // Validate number of files
-      if (uploadedFiles.length + fileArray.length > maxFiles) {
-        setError(`Maximum ${maxFiles} files allowed`);
-        return;
-      }
-
-      // Validate file sizes and types
-      for (const file of fileArray) {
-        if (file.size > maxSize * 1024 * 1024) {
-          setError(`File ${file.name} exceeds ${maxSize}MB limit`);
-          return;
-        }
-
-        const isAccepted = acceptedTypes.some((type) => {
-          if (type.endsWith("/*")) {
-            return file.type.startsWith(type.replace("/*", ""));
-          }
-          return file.type === type || file.name.endsWith(type);
-        });
-
-        if (!isAccepted) {
-          setError(`File type not accepted: ${file.name}`);
-          return;
-        }
-      }
-
-      // Upload files
-      fileArray.forEach(uploadFile);
+  const { getRootProps, isDragActive } = useDropzone({
+    multiple: false,
+    noClick: true,
+    onDrop: handleFileChange,
+    onDropRejected: (error) => {
+      console.log(error);
     },
-    [uploadedFiles.length, maxFiles, maxSize, acceptedTypes]
-  );
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      handleFiles(e.dataTransfer.files);
-    },
-    [handleFiles]
-  );
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const removeFile = (index: number) => {
-    setUploadedFiles((prev) => {
-      const newFiles = prev.filter((_, i) => i !== index);
-      onUpload(newFiles);
-      return newFiles;
-    });
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-  };
+  });
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={cn(
-          "rounded-lg border-2 border-dashed p-8 text-center transition-colors",
-          isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-primary/50"
-        )}
+    <div className="w-full" {...getRootProps()}>
+      <motion.div
+        onClick={handleClick}
+        whileHover="animate"
+        className="p-10 group/file block rounded-lg cursor-pointer w-full relative overflow-hidden"
       >
-        <Upload className="mx-auto mb-4 size-12 text-muted-foreground" />
-        <p className="mb-2 text-sm font-medium">
-          Drop files here or click to browse
-        </p>
-        <p className="mb-4 text-xs text-muted-foreground">
-          Maximum {maxFiles} files, up to {maxSize}MB each
-        </p>
         <input
+          ref={fileInputRef}
+          id="file-upload-handle"
           type="file"
-          multiple
-          accept={acceptedTypes.join(",")}
-          onChange={(e) => handleFiles(e.target.files)}
+          onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
-          id="file-upload"
         />
-        <Button asChild variant="outline" size="sm">
-          <label htmlFor="file-upload" className="cursor-pointer">
-            Choose Files
-          </label>
-        </Button>
-      </div>
-
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
+        <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]">
+          <GridPattern />
         </div>
-      )}
+        <div className="flex flex-col items-center justify-center">
+          <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">
+            Upload file
+          </p>
+          <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
+            Drag or drop your files here or click to upload
+          </p>
+          <div className="relative w-full mt-10 max-w-xl mx-auto">
+            {files.length > 0 &&
+              files.map((file, idx) => (
+                <motion.div
+                  key={"file" + idx}
+                  layoutId={idx === 0 ? "file-upload" : "file-upload-" + idx}
+                  className={cn(
+                    "relative overflow-hidden z-40 bg-white dark:bg-neutral-900 flex flex-col items-start justify-start md:h-24 p-4 mt-4 w-full mx-auto rounded-md",
+                    "shadow-sm"
+                  )}
+                >
+                  <div className="flex justify-between w-full items-center gap-4">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="text-base text-neutral-700 dark:text-neutral-300 truncate max-w-xs"
+                    >
+                      {file.name}
+                    </motion.p>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="rounded-lg px-2 py-1 w-fit flex-shrink-0 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-white shadow-input"
+                    >
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </motion.p>
+                  </div>
 
-      {uploadingFiles.length > 0 && (
-        <div className="space-y-2">
-          {uploadingFiles.map((file) => (
-            <div key={file.name} className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
-                <span className="truncate">{file.name}</span>
-                <span className="text-muted-foreground">{file.progress}%</span>
-              </div>
-              <Progress value={file.progress} />
-            </div>
-          ))}
-        </div>
-      )}
+                  <div className="flex text-sm md:flex-row flex-col items-start md:items-center w-full mt-2 justify-between text-neutral-600 dark:text-neutral-400">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="px-1 py-0.5 rounded-md bg-gray-100 dark:bg-neutral-800 "
+                    >
+                      {file.type}
+                    </motion.p>
 
-      {uploadedFiles.length > 0 && (
-        <div className="space-y-2">
-          {uploadedFiles.map((file, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-3 rounded-md border p-3"
-            >
-              {file.type.startsWith("image/") ? (
-                <ImageIcon className="size-8 text-muted-foreground" />
-              ) : (
-                <File className="size-8 text-muted-foreground" />
-              )}
-              <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatFileSize(file.size)}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeFile(index)}
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                    >
+                      modified{" "}
+                      {new Date(file.lastModified).toLocaleDateString()}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              ))}
+            {!files.length && (
+              <motion.div
+                layoutId="file-upload"
+                variants={mainVariant}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                }}
+                className={cn(
+                  "relative group-hover/file:shadow-2xl z-40 bg-white dark:bg-neutral-900 flex items-center justify-center h-32 mt-4 w-full max-w-[8rem] mx-auto rounded-md",
+                  "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]"
+                )}
               >
-                <X className="size-4" />
-              </Button>
-            </div>
-          ))}
+                {isDragActive ? (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-neutral-600 flex flex-col items-center"
+                  >
+                    Drop it
+                    <IconUpload className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+                  </motion.p>
+                ) : (
+                  <IconUpload className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
+                )}
+              </motion.div>
+            )}
+
+            {!files.length && (
+              <motion.div
+                variants={secondaryVariant}
+                className="absolute opacity-0 border border-dashed border-sky-400 inset-0 z-30 bg-transparent flex items-center justify-center h-32 mt-4 w-full max-w-[8rem] mx-auto rounded-md"
+              ></motion.div>
+            )}
+          </div>
         </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export function GridPattern() {
+  const columns = 41;
+  const rows = 11;
+  return (
+    <div className="flex bg-gray-100 dark:bg-neutral-900 flex-shrink-0 flex-wrap justify-center items-center gap-x-px gap-y-px  scale-105">
+      {Array.from({ length: rows }).map((_, row) =>
+        Array.from({ length: columns }).map((_, col) => {
+          const index = row * columns + col;
+          return (
+            <div
+              key={`${col}-${row}`}
+              className={`w-10 h-10 flex flex-shrink-0 rounded-[2px] ${
+                index % 2 === 0
+                  ? "bg-gray-50 dark:bg-neutral-950"
+                  : "bg-gray-50 dark:bg-neutral-950 shadow-[0px_0px_1px_3px_rgba(255,255,255,1)_inset] dark:shadow-[0px_0px_1px_3px_rgba(0,0,0,1)_inset]"
+              }`}
+            />
+          );
+        })
       )}
     </div>
   );
 }
-

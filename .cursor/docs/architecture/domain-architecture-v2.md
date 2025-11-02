@@ -100,6 +100,26 @@ Each domain has its own **database schema**, **business logic**, and **React com
 
 ---
 
+## Cross-Cutting Concerns
+
+### Monetization & Revenue Model
+
+LendingOS implements multiple revenue streams as a platform business:
+
+- **Transaction Fees**: Platform fees on investment transactions
+- **Subscription Plans**: Tiered access (Basic, Premium, Pro) with feature gating
+- **Listing Fees**: Developer/partner listing monetization
+- **Fund Fees**: Management and performance fees with waterfall calculations
+- **Affiliate/Referral**: Partner commission tracking and payouts
+- **Advisory Services**: Portfolio management and consulting fees
+- **White-Label Licensing**: Platform licensing with custom branding
+
+**Status**: Foundation exists (fee fields in schema), full implementation planned for Sprint 9-11.
+
+📖 **Read More**: [Monetization Strategy](./monetization-strategy.md)
+
+---
+
 ## Event-Driven Architecture
 
 LendingOS includes a lightweight **event bus** (`/lib/eventBus.ts`) powered by Supabase functions or PostgreSQL message queues.

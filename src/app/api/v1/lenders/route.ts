@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LenderService } from "@/services/lender.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import { createLenderSchema } from "@/lib/validation/lenders";
 import type { CreateLenderDTO } from "@/types/lender";
 
@@ -10,9 +10,9 @@ import type { CreateLenderDTO } from "@/types/lender";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
 
-    const lenders = await LenderService.getLendersByOrganization(session.userId);
+    const lenders = await LenderService.getLendersByOrganization(session.organizationId);
 
     return NextResponse.json({
       success: true,
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
     const body = await request.json();
 
     // Validate with Zod
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const lenderData: CreateLenderDTO = {
       ...validationResult.data,
-      organizationId: session.userId,
+      organizationId: session.organizationId,
     };
 
     const lender = await LenderService.createLender(lenderData);

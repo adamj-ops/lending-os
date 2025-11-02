@@ -1,13 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoanService } from "@/services/loan.service";
 import { LoanDocumentType } from "@/types/loan-document";
+import { requireOrganization } from "@/lib/clerk-server";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { id } = await params;
+
+    // Verify loan belongs to user's organization
+    const loan = await LoanService.getLoanById(id);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+
     const documents = await LoanService.getDocuments(id);
 
     return NextResponse.json({
@@ -28,8 +46,24 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { id } = await params;
     const body = await request.json();
+
+    // Verify loan belongs to user's organization
+    const loan = await LoanService.getLoanById(id);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
 
     const document = await LoanService.createDocument({
       loanId: id,
@@ -37,7 +71,7 @@ export async function POST(
       fileName: body.fileName,
       fileUrl: body.fileUrl,
       fileSize: body.fileSize,
-      uploadedBy: body.uploadedBy,
+      uploadedBy: session.userId,
     });
 
     return NextResponse.json({

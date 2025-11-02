@@ -46,15 +46,15 @@ export function getStatusLabel(status: LoanStatus): string {
 /**
  * Get color variant for status badge
  */
-export function getStatusVariant(status: LoanStatus): "default" | "secondary" | "destructive" | "outline" {
-  const variants: Record<LoanStatus, "default" | "secondary" | "destructive" | "outline"> = {
+export function getStatusVariant(status: LoanStatus): "primary" | "secondary" | "destructive" | "outline" {
+  const variants: Record<LoanStatus, "primary" | "secondary" | "destructive" | "outline"> = {
     [LoanStatus.DRAFT]: "secondary",
     [LoanStatus.SUBMITTED]: "outline",
     [LoanStatus.VERIFICATION]: "outline",
     [LoanStatus.UNDERWRITING]: "outline",
-    [LoanStatus.APPROVED]: "default",
-    [LoanStatus.CLOSING]: "default",
-    [LoanStatus.FUNDED]: "default",
+    [LoanStatus.APPROVED]: "primary",
+    [LoanStatus.CLOSING]: "primary",
+    [LoanStatus.FUNDED]: "primary",
     [LoanStatus.REJECTED]: "destructive",
   };
   return variants[status];

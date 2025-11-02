@@ -1,42 +1,38 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export function cn(...inputs: ClassValue[]) {
+/**
+ * Merges Tailwind class names, resolving any conflicts.
+ *
+ * @param inputs - An array of class names to merge.
+ * @returns A string of merged and optimized class names.
+ */
+export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export const getInitials = (str: string): string => {
-  if (typeof str !== "string" || !str.trim()) return "?";
+/**
+ * Formats a number as currency (USD).
+ *
+ * @param value - The number to format as currency.
+ * @returns A formatted currency string.
+ */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(value);
+}
 
-  return (
-    str
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase() || "?"
-  );
-};
-
-export function formatCurrency(
-  amount: number,
-  opts?: {
-    currency?: string;
-    locale?: string;
-    minimumFractionDigits?: number;
-    maximumFractionDigits?: number;
-    noDecimals?: boolean;
-  },
-) {
-  const { currency = "USD", locale = "en-US", minimumFractionDigits, maximumFractionDigits, noDecimals } = opts ?? {};
-
-  const formatOptions: Intl.NumberFormatOptions = {
-    style: "currency",
-    currency,
-    minimumFractionDigits: noDecimals ? 0 : minimumFractionDigits,
-    maximumFractionDigits: noDecimals ? 0 : maximumFractionDigits,
-  };
-
-  return new Intl.NumberFormat(locale, formatOptions).format(amount);
+/**
+ * Gets the initials from a full name.
+ *
+ * @param name - The full name to get initials from.
+ * @returns The initials (first letter of first and last name).
+ */
+export function getInitials(name: string): string {
+  const parts = name.trim().split(' ');
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }

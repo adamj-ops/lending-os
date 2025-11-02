@@ -1,0 +1,153 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { IconX } from "@tabler/icons-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { LoanWithRelations } from "@/types/loan";
+import { OverviewTab } from "./tabs/overview-tab";
+import { PropertyTab } from "./tabs/property-tab";
+import { BorrowerTab } from "./tabs/borrower-tab";
+import { LenderTab } from "./tabs/lender-tab";
+import { DocumentsTab } from "./tabs/documents-tab";
+import { NotesTab } from "./tabs/notes-tab";
+import { ProgressTab } from "./tabs/progress-tab";
+
+interface LoanDetailDrawerProps {
+  loanId: string | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate?: () => void;
+}
+
+export function LoanDetailDrawer({
+  loanId,
+  open,
+  onOpenChange,
+  onUpdate,
+}: LoanDetailDrawerProps) {
+  const [loan, setLoan] = useState<LoanWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (loanId && open) {
+      fetchLoan();
+    }
+  }, [loanId, open]);
+
+  const fetchLoan = async () => {
+    if (!loanId) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/v1/loans/${loanId}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setLoan(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching loan:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoanUpdate = () => {
+    fetchLoan();
+    onUpdate?.();
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="border-b">
+          <div className="flex items-start justify-between">
+            <div>
+              <DrawerTitle>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-64" />
+                ) : (
+                  `Loan ${loan?.propertyAddress || ""}`
+                )}
+              </DrawerTitle>
+              <DrawerDescription>
+                View and manage loan details
+              </DrawerDescription>
+            </div>
+            <DrawerClose asChild>
+              <Button variant="ghost" size="icon">
+                <IconX size={20} stroke={2} className="size-4" />
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerHeader>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : loan ? (
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="w-full justify-start overflow-x-auto">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="property">Property</TabsTrigger>
+                <TabsTrigger value="borrower">Borrower</TabsTrigger>
+                <TabsTrigger value="lender">Lender</TabsTrigger>
+                <TabsTrigger value="documents">Documents</TabsTrigger>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="progress">Progress</TabsTrigger>
+              </TabsList>
+
+              <div className="mt-6">
+                <TabsContent value="overview">
+                  <OverviewTab loan={loan} onUpdate={handleLoanUpdate} />
+                </TabsContent>
+
+                <TabsContent value="property">
+                  <PropertyTab loan={loan} />
+                </TabsContent>
+
+                <TabsContent value="borrower">
+                  <BorrowerTab loan={loan} />
+                </TabsContent>
+
+                <TabsContent value="lender">
+                  <LenderTab loan={loan} />
+                </TabsContent>
+
+                <TabsContent value="documents">
+                  <DocumentsTab loanId={loan.id} />
+                </TabsContent>
+
+                <TabsContent value="notes">
+                  <NotesTab loanId={loan.id} />
+                </TabsContent>
+
+                <TabsContent value="progress">
+                  <ProgressTab loan={loan} />
+                </TabsContent>
+              </div>
+            </Tabs>
+          ) : (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-muted-foreground">Loan not found</p>
+            </div>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+

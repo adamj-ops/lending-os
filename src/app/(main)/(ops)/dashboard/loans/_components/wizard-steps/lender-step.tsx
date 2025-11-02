@@ -1,0 +1,167 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { IconSearch } from "@tabler/icons-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWizardStore } from "@/lib/wizard-state";
+
+interface LenderStepProps {
+  onNext: () => void;
+  onBack: () => void;
+}
+
+export function LenderStep({ onNext }: LenderStepProps) {
+  const { lender, isNewLender, setLender } = useWizardStore();
+  const [mode, setMode] = useState<"existing" | "new">(isNewLender ? "new" : "existing");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [lenders, setLenders] = useState<any[]>([]);
+  const [selectedLender, setSelectedLender] = useState<any>(lender);
+  const [newLenderData, setNewLenderData] = useState({
+    name: lender?.name || "",
+    entityType: lender?.entityType || "",
+    contactEmail: lender?.contactEmail || "",
+    contactPhone: lender?.contactPhone || "",
+  });
+
+  useEffect(() => {
+    if (mode === "existing") {
+      fetchLenders();
+    }
+  }, [mode]);
+
+  const fetchLenders = async () => {
+    try {
+      const response = await fetch("/api/v1/lenders");
+      const result = await response.json();
+      if (result.success) {
+        setLenders(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching lenders:", error);
+    }
+  };
+
+  const handleContinue = () => {
+    if (mode === "existing" && selectedLender) {
+      setLender({ id: selectedLender.id }, false);
+      onNext();
+    } else if (mode === "new" && newLenderData.name && newLenderData.entityType) {
+      setLender(
+        {
+          name: newLenderData.name,
+          entityType: newLenderData.entityType,
+          contactEmail: newLenderData.contactEmail,
+          contactPhone: newLenderData.contactPhone,
+        },
+        true
+      );
+      onNext();
+    }
+  };
+
+  const filteredLenders = lenders.filter((l) =>
+    l.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <Tabs value={mode} onValueChange={(v) => setMode(v as "existing" | "new")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="existing">Select Existing</TabsTrigger>
+          <TabsTrigger value="new">Create New</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="existing" className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="search">Search Lenders</Label>
+            <div className="relative">
+              <IconSearch size={20} stroke={2} className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="search"
+                placeholder="Search by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          <div className="max-h-[300px] space-y-2 overflow-y-auto">
+            {filteredLenders.map((l) => (
+              <div
+                key={l.id}
+                onClick={() => setSelectedLender(l)}
+                className={`cursor-pointer rounded-lg border p-3 transition-all ${
+                  selectedLender?.id === l.id
+                    ? "border-primary bg-primary/5"
+                    : "hover:border-primary/50"
+                }`}
+              >
+                <p className="font-medium">{l.name}</p>
+                <p className="text-sm text-muted-foreground">{l.entityType}</p>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="new" className="space-y-4">
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Lender Name *</Label>
+              <Input
+                id="name"
+                value={newLenderData.name}
+                onChange={(e) => setNewLenderData({ ...newLenderData, name: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="entityType">Entity Type *</Label>
+              <Select
+                value={newLenderData.entityType}
+                onValueChange={(v) => setNewLenderData({ ...newLenderData, entityType: v })}
+              >
+                <SelectTrigger id="entityType">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="individual">Individual</SelectItem>
+                  <SelectItem value="bank">Bank</SelectItem>
+                  <SelectItem value="credit_union">Credit Union</SelectItem>
+                  <SelectItem value="private_lender">Private Lender</SelectItem>
+                  <SelectItem value="investment_group">Investment Group</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail">Contact Email</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  value={newLenderData.contactEmail}
+                  onChange={(e) => setNewLenderData({ ...newLenderData, contactEmail: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contactPhone">Contact Phone</Label>
+                <Input
+                  id="contactPhone"
+                  type="tel"
+                  value={newLenderData.contactPhone}
+                  onChange={(e) => setNewLenderData({ ...newLenderData, contactPhone: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+

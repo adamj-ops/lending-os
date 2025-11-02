@@ -1,27 +1,29 @@
 import {
-  ShoppingBag,
-  Forklift,
-  Mail,
-  MessageSquare,
-  Calendar,
-  Kanban,
-  ReceiptText,
-  Users,
-  Lock,
-  Fingerprint,
-  SquareArrowUpRight,
-  LayoutDashboard,
-  ChartBar,
-  Banknote,
-  Gauge,
-  GraduationCap,
-  type LucideIcon,
-} from "lucide-react";
+  IconShoppingBag,
+  IconTruckDelivery,
+  IconMail,
+  IconMessageCircle,
+  IconCalendar,
+  IconLayoutKanban,
+  IconReceipt,
+  IconUsers,
+  IconLock,
+  IconFingerprint,
+  IconExternalLink,
+  IconLayoutDashboard,
+  IconChartBar,
+  IconCash,
+  IconGauge,
+  IconSchool,
+  IconTrendingUp,
+  IconShieldCheck,
+  type Icon,
+} from "@tabler/icons-react";
 
 export interface NavSubItem {
   title: string;
   url: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   comingSoon?: boolean;
   newTab?: boolean;
   isNew?: boolean;
@@ -30,7 +32,7 @@ export interface NavSubItem {
 export interface NavMainItem {
   title: string;
   url: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   subItems?: NavSubItem[];
   comingSoon?: boolean;
   newTab?: boolean;
@@ -51,7 +53,7 @@ export const sidebarItems: NavGroup[] = [
       {
         title: "Portfolio",
         url: "/dashboard/portfolio",
-        icon: LayoutDashboard,
+        icon: IconLayoutDashboard,
       },
     ],
   },
@@ -62,22 +64,37 @@ export const sidebarItems: NavGroup[] = [
       {
         title: "Loans",
         url: "/dashboard/loans",
-        icon: ReceiptText,
+        icon: IconReceipt,
       },
       {
         title: "Borrowers",
         url: "/dashboard/borrowers",
-        icon: Users,
+        icon: IconUsers,
       },
       {
         title: "Lenders",
         url: "/dashboard/lenders",
-        icon: Banknote,
+        icon: IconCash,
+      },
+      {
+        title: "Funds",
+        url: "/dashboard/funds",
+        icon: IconTrendingUp,
+        subItems: [
+          {
+            title: "All Funds",
+            url: "/dashboard/funds",
+          },
+          {
+            title: "Analytics",
+            url: "/dashboard/funds/analytics",
+          },
+        ],
       },
       {
         title: "Properties",
         url: "/dashboard/properties",
-        icon: ShoppingBag,
+        icon: IconShoppingBag,
       },
     ],
   },
@@ -88,20 +105,25 @@ export const sidebarItems: NavGroup[] = [
       {
         title: "Payments",
         url: "/dashboard/coming-soon",
-        icon: ChartBar,
+        icon: IconChartBar,
         comingSoon: true,
       },
       {
         title: "Draws",
         url: "/dashboard/coming-soon",
-        icon: Forklift,
+        icon: IconTruckDelivery,
         comingSoon: true,
       },
       {
         title: "Documents",
         url: "/dashboard/coming-soon",
-        icon: Mail,
+        icon: IconMail,
         comingSoon: true,
+      },
+      {
+        title: "Compliance",
+        url: "/dashboard/compliance",
+        icon: IconShieldCheck,
       },
     ],
   },
@@ -112,13 +134,13 @@ export const sidebarItems: NavGroup[] = [
       {
         title: "Team",
         url: "/dashboard/coming-soon",
-        icon: Users,
+        icon: IconUsers,
         comingSoon: true,
       },
       {
         title: "Organization",
         url: "/dashboard/coming-soon",
-        icon: Lock,
+        icon: IconLock,
         comingSoon: true,
       },
     ],

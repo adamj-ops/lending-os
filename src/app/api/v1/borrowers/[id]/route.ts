@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BorrowerService } from "@/services/borrower.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import { updateBorrowerSchema } from "@/lib/validation/borrowers";
 import type { UpdateBorrowerDTO } from "@/types/borrower";
 
@@ -13,12 +13,17 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const borrower = await BorrowerService.getBorrowerById(id);
 
     if (!borrower) {
+      return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
+    }
+
+    // Verify borrower belongs to user's organization
+    if (borrower.organizationId !== session.organizationId) {
       return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
     }
 
@@ -45,7 +50,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const body = await request.json();
 
@@ -63,11 +68,19 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const borrower = await BorrowerService.updateBorrower(id, validationResult.data);
 
-    if (!borrower) {
+    // Get borrower first to verify ownership
+    const existingBorrower = await BorrowerService.getBorrowerById(id);
+    if (!existingBorrower) {
       return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
     }
+
+    // Verify borrower belongs to user's organization
+    if (existingBorrower.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
+    }
+
+    const borrower = await BorrowerService.updateBorrower(id, validationResult.data);
 
     return NextResponse.json({
       success: true,
@@ -92,14 +105,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
-    const success = await BorrowerService.deleteBorrower(id);
 
-    if (!success) {
+    // Get borrower first to verify ownership
+    const borrower = await BorrowerService.getBorrowerById(id);
+    if (!borrower) {
       return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
     }
+
+    // Verify borrower belongs to user's organization
+    if (borrower.organizationId !== session.organizationId) {
+      return NextResponse.json({ success: false, error: "Borrower not found" }, { status: 404 });
+    }
+
+    const success = await BorrowerService.deleteBorrower(id);
 
     return NextResponse.json({
       success: true,

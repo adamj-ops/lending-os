@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoanService } from "@/services/loan.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { CreateLoanDTO } from "@/types/loan";
 
 /**
@@ -9,11 +9,9 @@ import type { CreateLoanDTO } from "@/types/loan";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
 
-    // For now, we'll use the user ID as organization ID
-    // In Sprint 2, we'll properly handle organization relationships
-    const loans = await LoanService.getLoansByOrganization(session.userId);
+    const loans = await LoanService.getLoansByOrganization(session.organizationId);
 
     return NextResponse.json({
       success: true,
@@ -36,7 +34,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requireOrganization();
 
     const body: CreateLoanDTO = await request.json();
 
@@ -51,10 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, use user ID as organization ID
     const loanData: CreateLoanDTO = {
       ...body,
-      organizationId: session.userId,
+      organizationId: session.organizationId,
     };
 
     const loan = await LoanService.createLoan(loanData);

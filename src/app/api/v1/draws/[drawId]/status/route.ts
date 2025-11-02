@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DrawService } from "@/services/draw.service";
-import { DrawStatus } from "@/types/draw";
+import { LoanService } from "@/services/loan.service";
+import { DrawStatusValues as DrawStatus } from "@/db/schema";
+import { requireOrganization } from "@/lib/clerk-server";
 
 /**
  * PUT /api/v1/draws/:drawId/status
@@ -11,10 +13,35 @@ export async function PUT(
   { params }: { params: Promise<{ drawId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { drawId } = await params;
     const body = await request.json();
 
-    const { status, amountApproved, notes, rejectionReason, amountDisbursed, approvedBy, rejectedBy, disbursedBy } = body;
+    // Get draw first
+    const draw = await DrawService.getDraw(drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the draw's loan belongs to user's organization
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Draw not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const { status, amountApproved, notes, rejectionReason, amountDisbursed } = body;
 
     if (!status) {
       return NextResponse.json(
@@ -23,46 +50,46 @@ export async function PUT(
       );
     }
 
-    let draw;
+    let updatedDraw;
 
     switch (status) {
       case DrawStatus.APPROVED:
-        if (!amountApproved || !approvedBy) {
+        if (!amountApproved) {
           return NextResponse.json(
-            { success: false, error: "amountApproved and approvedBy are required for approval" },
+            { success: false, error: "amountApproved is required for approval" },
             { status: 400 }
           );
         }
-        draw = await DrawService.approveDraw(drawId, {
+        updatedDraw = await DrawService.approveDraw(drawId, {
           amountApproved,
-          approvedBy,
+          approvedBy: session.userId,
           notes,
         });
         break;
 
       case DrawStatus.REJECTED:
-        if (!rejectedBy || !rejectionReason) {
+        if (!rejectionReason) {
           return NextResponse.json(
-            { success: false, error: "rejectedBy and rejectionReason are required for rejection" },
+            { success: false, error: "rejectionReason is required for rejection" },
             { status: 400 }
           );
         }
-        draw = await DrawService.rejectDraw(drawId, {
-          rejectedBy,
+        updatedDraw = await DrawService.rejectDraw(drawId, {
+          rejectedBy: session.userId,
           rejectionReason,
         });
         break;
 
       case DrawStatus.DISBURSED:
-        if (!amountDisbursed || !disbursedBy) {
+        if (!amountDisbursed) {
           return NextResponse.json(
-            { success: false, error: "amountDisbursed and disbursedBy are required for disbursement" },
+            { success: false, error: "amountDisbursed is required for disbursement" },
             { status: 400 }
           );
         }
-        draw = await DrawService.disburseDraw(drawId, {
+        updatedDraw = await DrawService.disburseDraw(drawId, {
           amountDisbursed,
-          disbursedBy,
+          disbursedBy: session.userId,
           notes,
         });
         break;
@@ -76,7 +103,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: draw,
+      data: updatedDraw,
     });
   } catch (error) {
     console.error("Error updating draw status:", error);

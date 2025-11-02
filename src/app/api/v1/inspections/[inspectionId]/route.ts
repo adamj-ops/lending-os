@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { InspectionService } from "@/services/inspection.service";
+import { DrawService } from "@/services/draw.service";
+import { LoanService } from "@/services/loan.service";
+import { requireOrganization } from "@/lib/clerk-server";
 
 /**
  * GET /api/v1/inspections/:inspectionId
@@ -10,6 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ inspectionId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { inspectionId } = await params;
 
     const inspection = await InspectionService.getInspection(inspectionId);
@@ -17,6 +21,29 @@ export async function GET(
     if (!inspection) {
       return NextResponse.json(
         { success: false, error: "Inspection not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the inspection's draw's loan belongs to user's organization
+    const draw = await DrawService.getDraw(inspection.drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
         { status: 404 }
       );
     }
@@ -47,10 +74,43 @@ export async function PUT(
   { params }: { params: Promise<{ inspectionId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { inspectionId } = await params;
     const body = await request.json();
 
-    const inspection = await InspectionService.updateInspection(inspectionId, {
+    // Get inspection first
+    const inspection = await InspectionService.getInspection(inspectionId);
+    if (!inspection) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the inspection's draw's loan belongs to user's organization
+    const draw = await DrawService.getDraw(inspection.drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const updatedInspection = await InspectionService.updateInspection(inspectionId, {
       status: body.status,
       scheduledDate: body.scheduledDate,
       inspectionLocation: body.inspectionLocation,
@@ -59,7 +119,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: inspection,
+      data: updatedInspection,
     });
   } catch (error) {
     console.error("Error updating inspection:", error);
@@ -83,7 +143,40 @@ export async function DELETE(
   { params }: { params: Promise<{ inspectionId: string }> }
 ) {
   try {
+    const session = await requireOrganization();
     const { inspectionId } = await params;
+
+    // Get inspection first
+    const inspection = await InspectionService.getInspection(inspectionId);
+    if (!inspection) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the inspection's draw's loan belongs to user's organization
+    const draw = await DrawService.getDraw(inspection.drawId);
+    if (!draw) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    const loan = await LoanService.getLoanById(draw.loanId);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
+      return NextResponse.json(
+        { success: false, error: "Inspection not found or access denied" },
+        { status: 404 }
+      );
+    }
 
     await InspectionService.deleteInspection(inspectionId);
 

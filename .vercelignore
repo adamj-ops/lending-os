@@ -1,0 +1,40 @@
+# Scripts (dev-only utilities)
+scripts/
+
+# Tests
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+*.md
+!README.md
+docs/
+.cursor/
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Storybook
+.storybook/
+stories/
+
+# Misc
+cookies.txt
+new_cookies.txt
+playwright.config.ts
+vitest.config.ts
+vitest.config.mts
+vitest.shims.d.ts
+

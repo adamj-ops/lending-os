@@ -82,7 +82,7 @@ const form = useForm({
 - State: TanStack Query + Zustand
 
 **Forbidden:**
-- ❌ NextAuth, Clerk, Auth0, Better Auth
+- ✅ Clerk (current authentication system)
 - ❌ Prisma, TypeORM
 - ❌ Material UI, Bootstrap, Chakra
 - ❌ Redux, MobX

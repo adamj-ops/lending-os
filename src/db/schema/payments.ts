@@ -1,6 +1,6 @@
 import { pgTable, uuid, numeric, text, date, timestamp, index, pgEnum } from "drizzle-orm/pg-core";
 import { loans, paymentFrequencyEnum } from "./loans";
-import { users } from "./users";
+import { appUsers } from "./auth";
 
 /**
  * Payment Method Enum
@@ -67,7 +67,7 @@ export const payments = pgTable(
 
     // Metadata
     notes: text("notes"),
-    createdBy: uuid("created_by").references(() => users.id),
+    createdBy: text("created_by").references(() => appUsers.id),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -116,11 +116,10 @@ export const paymentSchedules = pgTable(
     // Status
     isActive: numeric("is_active").default("1"), // 1 = true, 0 = false (boolean as numeric)
     generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow().notNull(),
-    generatedBy: uuid("generated_by").references(() => users.id),
+    generatedBy: text("generated_by").references(() => appUsers.id),
   },
   (table) => ({
     loanIdIdx: index("payment_schedules_loan_id_idx").on(table.loanId),
     isActiveIdx: index("payment_schedules_is_active_idx").on(table.isActive),
   })
 );
-

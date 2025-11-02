@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiEnhancedForecast } from "@/lib/ai/utils";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { ForecastInput } from "@/types/forecast";
 
 /**
@@ -8,6 +9,9 @@ import type { ForecastInput } from "@/types/forecast";
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication to prevent unauthorized AI usage
+    const session = await requireOrganization();
+
     const body: ForecastInput = await request.json();
 
     // Validate required fields

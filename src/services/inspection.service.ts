@@ -1,17 +1,20 @@
 import { eq, and, inArray, desc } from "drizzle-orm";
 import { db } from "@/db/client";
-import { inspections, draws } from "@/db/schema";
 import {
-  type Inspection,
-  type CreateInspectionDTO,
-  type UpdateInspectionDTO,
-  type CompleteInspectionDTO,
-  type ScheduleInspectionDTO,
-  type PhotoData,
-  type OfflineData,
-  type SyncResult,
-  InspectionStatus,
-  DrawStatus,
+  inspections,
+  draws,
+  InspectionStatusValues as InspectionStatus,
+  DrawStatusValues as DrawStatus,
+} from "@/db/schema";
+import type {
+  Inspection,
+  CreateInspectionDTO,
+  UpdateInspectionDTO,
+  CompleteInspectionDTO,
+  ScheduleInspectionDTO,
+  PhotoData,
+  OfflineData,
+  SyncResult,
 } from "@/types/draw";
 
 export class InspectionService {

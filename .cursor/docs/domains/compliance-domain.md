@@ -129,6 +129,41 @@ Located in: `src/app/(main)/dashboard/compliance/`
 
 ---
 
+## E-Signature Integration (Implementation Plan)
+
+**Current State**: Planned, no e-signature capability for loan agreements, PPMs, subscription docs
+
+**Market Validation**: 
+- Industry standard for investor platforms
+- Required for SEC Reg D 506(c) compliance
+- Critical for same-day deal closing
+
+**Implementation**:
+- Integrate DocuSign/SignNow into borrower and fund onboarding flows
+- Support document templates:
+  - Loan agreements
+  - PPM documents
+  - Subscription agreements
+  - Compliance disclosures
+
+**Technical Requirements**:
+- Create `SignatureService` integration layer (`src/services/signature.service.ts`)
+- Add `document_signatures` table
+- Webhook handlers for signature completion
+- Template management system
+- Integration with event bus for automated workflows
+
+**Success Metrics**:
+- Document signature completion: <2 hours (vs. 2-3 days baseline)
+- 80% of documents signed electronically
+- Zero manual signature processes
+
+**Sprint Assignment**: Sprint 6 (Compliance Domain) - Phase 1 (Weeks 1-2)
+
+**Reference**: [Gaps & Opportunities](../product-strategy/gaps-and-opportunities.md), [90-Day Roadmap](../product-strategy/90-day-roadmap.md)
+
+---
+
 ## Future Features
 
 - [ ] Automated disclosure generation
@@ -137,7 +172,7 @@ Located in: `src/app/(main)/dashboard/compliance/`
 - [ ] Regulatory change monitoring
 - [ ] Compliance scoring and risk assessment
 - [ ] Automated audit report generation
-- [ ] Document e-signature workflow
+- [x] Document e-signature workflow - *Planned Sprint 6, Weeks 1-2*
 - [ ] Multi-state compliance management
 
 ---
@@ -147,9 +182,11 @@ Located in: `src/app/(main)/dashboard/compliance/`
 - [Loan Domain](./loan-domain.md)
 - [Fund Domain](./fund-domain.md)
 - [Event Catalog](../architecture/event-catalog.md)
+- [Gaps & Opportunities](../product-strategy/gaps-and-opportunities.md) - E-signature integration priority
+- [90-Day Roadmap](../product-strategy/90-day-roadmap.md) - Weeks 1-2 implementation plan
 
 ---
 
-**Version**: 0.1 (Planned)
-**Last Updated**: October 26, 2025
-**Status**: Design Phase
+**Version**: 0.2 (Planned)
+**Last Updated**: January 2025
+**Status**: Design Phase - E-Signature integration planned Sprint 6

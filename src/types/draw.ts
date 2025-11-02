@@ -4,29 +4,18 @@
  */
 
 // ============ ENUMS ============
+// Import from canonical source (database schema)
+import {
+  DrawStatusValues,
+  InspectionStatusValues,
+  InspectionTypeValues,
+  type DrawStatus,
+  type InspectionStatus,
+  type InspectionType,
+} from '@/db/schema/draws';
+export type { DrawStatus, InspectionStatus, InspectionType };
 
-export enum DrawStatus {
-  REQUESTED = "requested",
-  APPROVED = "approved",
-  INSPECTED = "inspected",
-  DISBURSED = "disbursed",
-  REJECTED = "rejected",
-}
-
-export enum InspectionType {
-  PROGRESS = "progress",
-  FINAL = "final",
-  QUALITY = "quality",
-  SAFETY = "safety",
-}
-
-export enum InspectionStatus {
-  SCHEDULED = "scheduled",
-  IN_PROGRESS = "in_progress",
-  COMPLETED = "completed",
-  FAILED = "failed",
-}
-
+// Enum-like value objects for ergonomics in the rest of the app
 // ============ BASE TYPES ============
 
 export interface Draw {
@@ -301,4 +290,3 @@ export interface InspectionWithDraw extends Inspection {
     amountRequested: string;
   };
 }
-

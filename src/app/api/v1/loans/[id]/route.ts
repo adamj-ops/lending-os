@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoanService } from "@/services/loan.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { UpdateLoanDTO } from "@/types/loan";
 
 /**
@@ -9,10 +9,16 @@ import type { UpdateLoanDTO } from "@/types/loan";
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
     const loan = await LoanService.getLoanById(id);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
 
     if (!loan) {
       return NextResponse.json({ success: false, error: "Loan not found" }, { status: 404 });
@@ -38,16 +44,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const body: UpdateLoanDTO = await request.json();
 
     const { id } = await params;
-    const loan = await LoanService.updateLoan(id, body);
 
-    if (!loan) {
+    // Verify loan belongs to user's organization
+    const existingLoan = await LoanService.getLoanById(id);
+    if (!existingLoan) {
       return NextResponse.json({ success: false, error: "Loan not found" }, { status: 404 });
     }
+
+    const loan = await LoanService.updateLoan(id, body);
 
     return NextResponse.json({
       success: true,
@@ -69,14 +78,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
     const { id } = await params;
-    const success = await LoanService.deleteLoan(id);
 
-    if (!success) {
+    // Verify loan belongs to user's organization before deleting
+    const loan = await LoanService.getLoanById(id);
+    if (!loan || loan.organizationId !== session.organizationId) {
+      return NextResponse.json(
+        { success: false, error: "Loan not found or access denied" },
+        { status: 404 }
+      );
+    }
+    if (!loan) {
       return NextResponse.json({ success: false, error: "Loan not found" }, { status: 404 });
     }
+
+    const success = await LoanService.deleteLoan(id);
 
     return NextResponse.json({
       success: true,

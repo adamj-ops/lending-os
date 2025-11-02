@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
-import { users } from "./users";
+import { appUsers } from "./auth";
 
 export const organizations = pgTable("organizations", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -12,9 +12,9 @@ export const organizations = pgTable("organizations", {
 export const userOrganizations = pgTable(
   "user_organizations",
   {
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => appUsers.id, { onDelete: "cascade" }),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),

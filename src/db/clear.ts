@@ -17,12 +17,14 @@ async function clearDatabase() {
   const db = drizzle(connection);
 
   try {
-    // Clear all tables in order (respecting foreign key constraints)
-    await db.execute(sql`TRUNCATE loans CASCADE`);
-    await db.execute(sql`TRUNCATE user_organizations CASCADE`);
-    await db.execute(sql`TRUNCATE sessions CASCADE`);
-    await db.execute(sql`TRUNCATE users CASCADE`);
-    await db.execute(sql`TRUNCATE organizations CASCADE`);
+    // Drop all tables by dropping and recreating the public schema
+    console.log("Dropping public schema...");
+    await db.execute(sql`DROP SCHEMA IF EXISTS public CASCADE`);
+    await db.execute(sql`CREATE SCHEMA public`);
+    await db.execute(sql`GRANT ALL ON SCHEMA public TO public`);
+
+    // Also clean up the drizzle schema
+    await db.execute(sql`DROP SCHEMA IF EXISTS drizzle CASCADE`);
 
     console.log("✅ Database cleared successfully!");
   } catch (error) {

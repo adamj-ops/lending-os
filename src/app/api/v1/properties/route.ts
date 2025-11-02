@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PropertyService } from "@/services/property.service";
-import { requireAuth } from "@/lib/session";
+import { requireOrganization } from "@/lib/clerk-server";
 import type { CreatePropertyDTO } from "@/types/property";
 
 /**
  * GET /api/v1/properties
- * Get all properties
+ * Get all properties for the authenticated user's organization
  */
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
 
-    const properties = await PropertyService.getProperties();
+    // Filter properties by organizationId from session
+    const properties = await PropertyService.getProperties(session.organizationId);
 
     return NextResponse.json({
       success: true,
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth();
+    const session = await requireOrganization();
     const body: CreatePropertyDTO = await request.json();
 
     // Validate required fields
@@ -48,7 +49,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const property = await PropertyService.createProperty(body);
+    // Add organizationId to property data
+    const propertyData: CreatePropertyDTO = {
+      ...body,
+      organizationId: session.organizationId,
+    };
+
+    const property = await PropertyService.createProperty(propertyData);
 
     return NextResponse.json(
       {

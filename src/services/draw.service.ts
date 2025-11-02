@@ -13,8 +13,8 @@ import {
   type DrawSummary,
   type BudgetStatus,
   type BudgetLineItem,
-  DrawStatus,
 } from "@/types/draw";
+import { DrawStatusValues as DrawStatus } from "@/db/schema/draws";
 
 export class DrawService {
   // ============ CRUD OPERATIONS ============
@@ -363,4 +363,3 @@ export class DrawService {
     // In a real system, you'd update the draw schedule and recalculate allocations
   }
 }
-

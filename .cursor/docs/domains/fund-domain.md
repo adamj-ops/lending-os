@@ -67,6 +67,40 @@ Located in: `src/app/(main)/dashboard/funds/`
 - `DistributionCalculator` - Calculate and preview distributions
 - `InvestorReports` - Generate investor statements
 
+## Investor Portal (Implementation Plan)
+
+**Current State**: Fund schemas exist (`src/db/schema/funds.ts`), planned but not delivered
+
+**Market Validation**: 
+- Required for parity with Fundrise, Yieldstreet, RealtyMogul
+- Investor self-service = reduced support burden
+- Unlocks monetization levers (AUM fees, performance fees)
+
+**Implementation**:
+- Deliver investor portal on top of existing fund schemas
+- Create investor-facing route: `src/app/(main)/(investor)/dashboard/`
+- Features:
+  - Capital call notifications and payments
+  - Distribution statements
+  - Performance dashboards
+  - Tax documents (K-1, 1099)
+  - Investment history
+
+**Technical Requirements**:
+- Investor authentication/authorization
+- Integration with fund domain services
+- Real-time updates via EventBus
+- Statement generation system
+
+**Success Metrics**:
+- 80% of investors use self-service portal
+- Portal engagement rate >50%
+- Reduced support ticket volume
+
+**Sprint Assignment**: Sprint 8 (Analytics & Investor Reporting) - Phase 1 (Weeks 5-6)
+
+**Reference**: [Gaps & Opportunities](../product-strategy/gaps-and-opportunities.md), [90-Day Roadmap](../product-strategy/90-day-roadmap.md)
+
 ---
 
 ## Business Rules
@@ -93,7 +127,9 @@ Located in: `src/app/(main)/dashboard/funds/`
 ## Future Features
 
 - [ ] Multi-fund support
-- [ ] Automated waterfall calculations
+- [ ] Automated waterfall calculations (see [Monetization Strategy](../architecture/monetization-strategy.md))
+- [ ] Management fee accrual (quarterly/annual)
+- [ ] Performance fee accrual on distributions
 - [ ] Investor portal (self-service)
 - [ ] Tax document generation (K-1, 1099)
 - [ ] Performance attribution analysis
@@ -106,8 +142,11 @@ Located in: `src/app/(main)/dashboard/funds/`
 - [Loan Domain](./loan-domain.md)
 - [Compliance Domain](./compliance-domain.md)
 - [Integration Adapters](../architecture/integration-adapters.md)
+- [Monetization Strategy](../architecture/monetization-strategy.md) - Fund fee waterfall implementation
+- [Gaps & Opportunities](../product-strategy/gaps-and-opportunities.md) - Investor portal priority
+- [90-Day Roadmap](../product-strategy/90-day-roadmap.md) - Weeks 5-6 implementation plan
 
 ---
 
-**Version**: 0.1 (Planned)
-**Last Updated**: October 26, 2025
+**Version**: 0.2 (Planned)
+**Last Updated**: January 2025

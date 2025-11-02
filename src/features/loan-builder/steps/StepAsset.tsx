@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Home, TrendingUp, Plus, CalendarIcon } from "lucide-react";
+import { IconHome, IconTrendingUp, IconPlus, IconCalendar } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -46,7 +46,7 @@ export function StepAsset() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Home className="size-5" />
+              <IconHome size={20} stroke={2} className="size-5" />
               Property Information
             </CardTitle>
           </CardHeader>
@@ -251,7 +251,7 @@ export function StepAsset() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="size-5" />
+              <IconTrendingUp size={20} stroke={2} className="size-5" />
               Investment Details
             </CardTitle>
           </CardHeader>
@@ -419,13 +419,12 @@ export function StepAsset() {
                               className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
                               type="button"
                             >
-                              <CalendarIcon className="size-3.5" />
+                              <IconCalendar size={14} stroke={2} className="size-3.5" />
                               <span className="sr-only">Select date</span>
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="end" sideOffset={10}>
-                            <Calendar
-                              mode="single"
+                            <Calendar mode="single"
                               selected={selectedDate}
                               month={month}
                               onMonthChange={setMonth}
@@ -500,13 +499,12 @@ export function StepAsset() {
                               className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
                               type="button"
                             >
-                              <CalendarIcon className="size-3.5" />
+                              <IconCalendar size={14} stroke={2} className="size-3.5" />
                               <span className="sr-only">Select date</span>
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="end" sideOffset={10}>
-                            <Calendar
-                              mode="single"
+                            <Calendar mode="single"
                               selected={selectedDate}
                               month={month}
                               onMonthChange={setMonth}

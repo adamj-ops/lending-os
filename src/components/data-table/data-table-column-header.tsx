@@ -1,5 +1,5 @@
 import { Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
+import { IconArrowDown, IconArrowUp, IconChevronsDown, IconEyeOff } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +19,11 @@ interface DataTableColumnHeaderProps<TData, TValue> extends React.HTMLAttributes
 function getSortIcon(sort: "asc" | "desc" | false | undefined) {
   switch (sort) {
     case "desc":
-      return <ArrowDown />;
+      return <IconArrowDown size={20} stroke={2} />;
     case "asc":
-      return <ArrowUp />;
+      return <IconArrowUp size={20} stroke={2} />;
     default:
-      return <ChevronsUpDown />;
+      return <IconChevronsDown size={20} stroke={2} />;
   }
 }
 
@@ -46,18 +46,18 @@ export function DataTableColumnHeader<TData, TValue>({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUp className="text-muted-foreground/70 h-3.5 w-3.5" />
+            <IconArrowUp size={20} stroke={2} className="text-muted-foreground/70 h-3.5 w-3.5" />
             Asc
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowDown className="text-muted-foreground/70 h-3.5 w-3.5" />
+            <IconArrowDown size={20} stroke={2} className="text-muted-foreground/70 h-3.5 w-3.5" />
             Desc
           </DropdownMenuItem>
           {column.columnDef.enableHiding !== false && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-                <EyeOff className="text-muted-foreground/70 h-3.5 w-3.5" />
+                <IconEyeOff size={20} stroke={2} className="text-muted-foreground/70 h-3.5 w-3.5" />
                 Hide
               </DropdownMenuItem>
             </>

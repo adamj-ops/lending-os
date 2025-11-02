@@ -150,6 +150,7 @@ Your app will be running at [http://localhost:3000](http://localhost:3000)
 - [Event-Driven System](.cursor/docs/architecture/event-driven-system.md)
 - [Migration Guide v1 → v2](.cursor/docs/architecture/migration-v1-to-v2.md)
 - [Integration Adapters](.cursor/docs/architecture/integration-adapters.md)
+- [Monetization Strategy](.cursor/docs/architecture/monetization-strategy.md)
 
 ### Domain Documentation
 
@@ -166,12 +167,33 @@ Your app will be running at [http://localhost:3000](http://localhost:3000)
 - [API Versioning](.cursor/docs/technical/api-versioning.md)
 - [AWS S3 Setup](.cursor/docs/technical/aws-s3-setup.md)
 
+### Product Strategy
+
+- [Product Strategy Overview](.cursor/docs/product-strategy/) - Market research, competitive analysis, 90-day roadmap
+- [Gaps & Opportunities](.cursor/docs/product-strategy/gaps-and-opportunities.md) - Critical gaps and priorities
+- [90-Day Roadmap](.cursor/docs/product-strategy/90-day-roadmap.md) - Tactical implementation plan
+- [Competitive Analysis](.cursor/docs/product-strategy/competitive-analysis.md) - Competitor teardowns
+- [Market Intelligence](.cursor/docs/product-strategy/market-intelligence.md) - 2025 market research
+- [Product Backlog](.cursor/docs/product-strategy/product-backlog.md) - Prioritized feature backlog
+- [Pitch Materials](.cursor/docs/product-strategy/pitch-materials.md) - Pitch deck asset mapping
+
 ### Development Rules
 
 - [Tech Stack Lock](.cursor/rules/tech-stack-lock.md) ⭐ **Read First**
 - [Domain Rules](.cursor/rules/domain-rules.md)
 - [Shadcn Usage](.cursor/rules/shadcn-usage.md)
 - [Agent Rules](.cursor/rules/agent-rules.md)
+
+---
+
+## 🧭 Investor Portal Implementation Notes
+
+- **Investor dashboard shell**: Create `/dashboard/investor` by adapting the analytics overview layout (`src/app/(main)/(ops)/analytics/page.tsx`) and sourcing lender-specific KPIs from `AnalyticsService` and fund snapshots.
+- **Yield Forecaster (Sprint 8 Week 1)**: Extend fund snapshot computation (`src/services/analytics.service.ts`) with projection fields and back a slider-driven capital deployment simulator that writes through the existing `capital_events` schema.
+- **Risk Radar (Sprint 8 Week 2)**: Consume inspection and draw events via the event bus (`src/lib/events/EventBus.ts`) to maintain a geo-tagged read model rendered as an interactive map with deep links to loan detail drawers.
+- **Capital Call Autopilot (Sprint 8.5)**: Persist investor deployment rules, subscribe to AI deal-score events, and auto-trigger capital calls when criteria are met while logging actions through `capital_events`.
+- **Compliance dependencies (Sprint 6)**: Surface DocuSign status and auto-KYC requirements inline so capital call approvals and statement access remain compliant once the integrations land.
+- **Monetization readiness**: Instrument feature flags and telemetry now so Autopilot tiers, tax reporting, and deployment fees can be gated when Stripe billing (Sprint 9) is enabled.
 
 ---
 

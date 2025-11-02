@@ -1,6 +1,6 @@
 import { pgTable, uuid, numeric, text, date, timestamp, integer, index, unique, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { loans } from "./loans";
-import { users } from "./users";
+import { appUsers } from "./auth";
 
 /**
  * Draw Status Enum
@@ -44,9 +44,9 @@ export const draws = pgTable(
 
     // Status & Workflow
     status: drawStatusEnum("status").default("requested"),
-    requestedBy: uuid("requested_by").references(() => users.id),
-    approvedBy: uuid("approved_by").references(() => users.id),
-    inspectedBy: uuid("inspected_by").references(() => users.id),
+    requestedBy: text("requested_by").references(() => appUsers.id),
+    approvedBy: text("approved_by").references(() => appUsers.id),
+    inspectedBy: text("inspected_by").references(() => appUsers.id),
 
     // Dates
     requestedDate: date("requested_date").defaultNow(),
@@ -76,12 +76,16 @@ export const draws = pgTable(
  * - final: Final inspection upon completion
  * - quality: Quality control inspection
  * - safety: Safety compliance inspection
+ * - compliance: General compliance inspection
+ * - other: Other type of inspection
  */
 export const inspectionTypeEnum = pgEnum("inspection_type_enum", [
   "progress",
   "final",
   "quality",
   "safety",
+  "compliance",
+  "other",
 ]);
 
 /**
@@ -90,12 +94,14 @@ export const inspectionTypeEnum = pgEnum("inspection_type_enum", [
  * - in_progress: Inspection currently in progress
  * - completed: Inspection completed
  * - failed: Inspection failed or could not be completed
+ * - cancelled: Inspection was cancelled
  */
 export const inspectionStatusEnum = pgEnum("inspection_status_enum", [
   "scheduled",
   "in_progress",
   "completed",
   "failed",
+  "cancelled",
 ]);
 
 /**
@@ -168,7 +174,7 @@ export const drawSchedules = pgTable(
     // Status
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    createdBy: uuid("created_by").references(() => users.id),
+    createdBy: text("created_by").references(() => appUsers.id),
   },
   (table) => ({
     loanIdIdx: index("draw_schedules_loan_id_idx").on(table.loanId),
@@ -176,3 +182,45 @@ export const drawSchedules = pgTable(
   })
 );
 
+/**
+ * CANONICAL SOURCE for Inspection Type Definitions
+ *
+ * Import these types from '@/db/schema' or '@/db/schema/draws', NOT from '@/types/inspection' or '@/types/draw'.
+ *
+ * The database enum and TypeScript types are kept in sync via Drizzle's type inference.
+ * This pattern follows the established convention in this codebase (see portal-roles.ts).
+ *
+ * DO NOT create duplicate enum definitions in other files.
+ */
+export type InspectionStatus = (typeof inspectionStatusEnum.enumValues)[number];
+export type InspectionType = (typeof inspectionTypeEnum.enumValues)[number];
+export type DrawStatus = (typeof drawStatusEnum.enumValues)[number];
+
+/**
+ * Enum-like constants for backward compatibility with existing code
+ * These provide InspectionStatus.SCHEDULED style syntax while using the canonical types
+ */
+export const InspectionStatusValues = {
+  SCHEDULED: "scheduled" as InspectionStatus,
+  IN_PROGRESS: "in_progress" as InspectionStatus,
+  COMPLETED: "completed" as InspectionStatus,
+  FAILED: "failed" as InspectionStatus,
+  CANCELLED: "cancelled" as InspectionStatus,
+} as const;
+
+export const InspectionTypeValues = {
+  PROGRESS: "progress" as InspectionType,
+  FINAL: "final" as InspectionType,
+  QUALITY: "quality" as InspectionType,
+  SAFETY: "safety" as InspectionType,
+  COMPLIANCE: "compliance" as InspectionType,
+  OTHER: "other" as InspectionType,
+} as const;
+
+export const DrawStatusValues = {
+  REQUESTED: "requested" as DrawStatus,
+  APPROVED: "approved" as DrawStatus,
+  INSPECTED: "inspected" as DrawStatus,
+  DISBURSED: "disbursed" as DrawStatus,
+  REJECTED: "rejected" as DrawStatus,
+} as const;

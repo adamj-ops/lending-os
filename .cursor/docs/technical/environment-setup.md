@@ -9,10 +9,14 @@ Create a `.env.local` file in the project root with the following variables:
 # Get your Neon Postgres connection string from: https://neon.tech
 DATABASE_URL="postgresql://user:password@host/database?sslmode=require"
 
-# BetterAuth Configuration
-# Generate a secure secret with: openssl rand -base64 32
-BETTER_AUTH_SECRET="your-secret-key-here-change-this-in-production"
-BETTER_AUTH_URL="http://localhost:3000"
+# Clerk Authentication Configuration
+# Get these from https://dashboard.clerk.com
+# Create an application and go to "API Keys" section
+CLERK_SECRET_KEY="sk_test_..." # Server-side secret key (required)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..." # Client-side publishable key (required)
+
+# Optional: App URL for production
+# NEXT_PUBLIC_APP_URL="https://your-app.com"
 
 # AWS S3 Configuration (Deferred to Sprint 2)
 # AWS_ACCESS_KEY_ID=""
@@ -31,15 +35,17 @@ NODE_ENV="development"
    - Create a new project
    - Copy the connection string and paste it as DATABASE_URL
 
-2. **Generate Auth Secret**
-   ```bash
-   openssl rand -base64 32
-   ```
-   - Copy the output and paste it as BETTER_AUTH_SECRET
+2. **Get Clerk API Keys**
+   - Sign up at https://clerk.com
+   - Create a new application
+   - Navigate to "API Keys" in the dashboard
+   - Copy the "Secret Key" → Set as `CLERK_SECRET_KEY`
+   - Copy the "Publishable Key" → Set as `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 
-3. **Set Auth URL**
-   - For local development: `http://localhost:3000`
-   - For production: Your actual domain URL
+3. **Set App URL (Optional)**
+   - `NEXT_PUBLIC_APP_URL`: Optional - used for production deployments
+     - For local development: Not required (automatically detected)
+     - For production: Set to your actual domain URL (e.g., `https://your-app.com`)
 
 ## Next Steps
 
