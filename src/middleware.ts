@@ -74,7 +74,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   if (!userId) {
     // Not authenticated, redirect to login
-    const loginUrl = new URL("/auth/v2/login", req.url);
+    const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("from", normalizedPath);
     return NextResponse.redirect(loginUrl);
   }
@@ -84,7 +84,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   if (!session) {
     // Session fetch failed, redirect to login
-    const loginUrl = new URL("/auth/v2/login", req.url);
+    const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("from", normalizedPath);
     return NextResponse.redirect(loginUrl);
   }
