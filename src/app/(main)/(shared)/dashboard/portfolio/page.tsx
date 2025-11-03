@@ -1,10 +1,12 @@
+import { requireAuth } from "@/lib/clerk-server";
 import { LoanSummary } from "./_components/loan-summary";
 import { DelinquencySummary } from "./_components/delinquency-summary";
 import { PortfolioOverview } from "./_components/portfolio-overview";
 import { RecentActivity } from "./_components/recent-activity";
 import { ApprovalTrendCard, MonthlyMetricsChart, RiskDistributionPie } from '@/components/charts';
 
-export default function Page() {
+export default async function Page() {
+  await requireAuth();
   return (
     <div className="space-y-4">
       {/* Existing Dashboard */}
