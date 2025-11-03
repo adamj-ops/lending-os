@@ -248,7 +248,7 @@ export function PaymentEntryForm({
               <span
                 className={cn(
                   "font-medium",
-                  breakdownValid ? "text-green-600" : "text-destructive"
+                  breakdownValid ? "text-brand-success" : "text-destructive"
                 )}
               >
                 ${breakdownSum.toFixed(2)}

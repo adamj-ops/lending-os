@@ -74,14 +74,14 @@ export default function AnalyticsOverview() {
                 </p>
               </div>
               <div className="rounded-lg border border-green-600 p-3 bg-transparent dark:border-green-400">
-                <h4 className="mb-1 text-sm font-semibold text-green-600 dark:text-green-400">Collections Efficiency</h4>
-                <p className="text-xs text-green-600 dark:text-green-400">
+                <h4 className="mb-1 text-sm font-semibold text-brand-success dark:text-green-400">Collections Efficiency</h4>
+                <p className="text-xs text-brand-success dark:text-green-400">
                   Payment collection is running 3.2 days ahead of schedule on average.
                 </p>
               </div>
               <div className="rounded-lg border border-yellow-600 p-3 bg-transparent dark:border-yellow-400">
-                <h4 className="mb-1 text-sm font-semibold text-yellow-600 dark:text-yellow-400">Inspection Productivity</h4>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                <h4 className="mb-1 text-sm font-semibold text-brand-accent dark:text-yellow-400">Inspection Productivity</h4>
+                <p className="text-xs text-brand-accent dark:text-yellow-400">
                   Field operations are completing inspections 1.8 hours faster than expected.
                 </p>
               </div>

@@ -122,7 +122,7 @@ export function LoansAnalyticsClient() {
             <CardTitle className="text-sm font-medium">Delinquent Loans</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{data?.kpis?.delinquentCount || 0}</div>
+            <div className="text-2xl font-bold text-brand-danger">{data?.kpis?.delinquentCount || 0}</div>
             <p className="text-xs text-muted-foreground">
               -2% from last month
             </p>
@@ -182,7 +182,7 @@ export function LoansAnalyticsClient() {
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">94.2%</p>
+                <p className="text-2xl font-bold text-brand-success">94.2%</p>
                 <p className="text-sm text-muted-foreground">Performing Rate</p>
               </div>
               <div className="text-center">

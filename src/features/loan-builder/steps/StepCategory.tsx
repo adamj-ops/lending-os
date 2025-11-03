@@ -36,7 +36,7 @@ const LOAN_CATEGORIES = [
     id: "hybrid" as LoanCategory,
     title: "Hybrid Loan",
     description: "Capital pool with future collateral assignment",
-    color: "text-red-500",
+    color: "text-brand-danger",
   },
 ];
 

@@ -10,17 +10,32 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] shadow-xs shadow-black/5 data-[state=open]:bg-[var(--accent-primary-hover)]',
-        mono: 'bg-zinc-950 text-white dark:bg-zinc-300 dark:text-black hover:bg-zinc-950/90 dark:hover:bg-zinc-300/90 data-[state=open]:bg-zinc-950/90 dark:data-[state=open]:bg-zinc-300/90',
-        destructive:
-          'bg-[var(--accent-error)] text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] shadow-xs shadow-black/5 data-[state=open]:opacity-90',
-        secondary: 'bg-[var(--surface-alt)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] data-[state=open]:bg-[var(--surface-hover)]',
-        outline: 'border border-[var(--border-primary)] text-[var(--text-primary)] bg-transparent hover:bg-[var(--surface)] hover:border-[var(--accent-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] data-[state=open]:bg-[var(--surface)]',
-        dashed:
-          'text-[var(--text-primary)] border border-[var(--border-primary)] border-dashed bg-transparent hover:bg-[var(--surface)] hover:border-[var(--accent-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] data-[state=open]:bg-[var(--surface)]',
-        ghost:
-          'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] data-[state=open]:bg-[var(--surface-hover)]',
-        dim: 'text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] data-[state=open]:text-foreground',
+        // PRIMARY - Teal filled (main actions)
+        primary: 'bg-brand-primary-500 text-slate-900 hover:bg-brand-primary-600 active:bg-brand-primary-700 font-semibold transition-colors duration-150',
+        
+        // SECONDARY - Outlined dark
+        secondary: 'bg-transparent border-2 border-slate-700 text-slate-100 hover:bg-brand-primary-950/20 hover:border-slate-600 transition-colors duration-150',
+        
+        // OUTLINE - Teal bordered
+        outline: 'border-2 border-brand-primary-500 text-brand-primary-500 bg-transparent hover:bg-brand-primary-950/10 transition-colors duration-150',
+        
+        // GHOST - Subtle
+        ghost: 'text-slate-100 hover:bg-brand-primary-950/10 hover:text-brand-primary-500 transition-colors duration-150',
+        
+        // DESTRUCTIVE - Red
+        destructive: 'bg-brand-danger-500 text-white hover:bg-brand-danger-600 active:bg-brand-danger-700 font-semibold transition-colors duration-150',
+        
+        // SUCCESS - Green
+        success: 'bg-brand-success-500 text-white hover:bg-brand-success-600 active:bg-brand-success-700 font-semibold transition-colors duration-150',
+        
+        // WARNING - Orange
+        warning: 'bg-brand-accent-500 text-white hover:bg-brand-accent-600 active:bg-brand-accent-700 font-semibold transition-colors duration-150',
+        
+        // DIM - Muted
+        dim: 'text-slate-400 hover:text-slate-100 transition-colors duration-150',
+        
+        // LEGACY (keep for compatibility but discourage use)
+        mono: 'bg-zinc-950 text-white dark:bg-zinc-300 dark:text-black hover:bg-zinc-950/90',
         foreground: '',
         inverse: '',
       },

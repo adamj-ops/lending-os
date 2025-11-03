@@ -1,12 +1,6 @@
 import { ReactNode } from "react";
 
 import type { Metadata, Viewport } from "next";
-import "@fontsource/geist-sans/index.css";
-import "@fontsource/geist-mono/index.css";
-import "@fontsource/lora/400.css";
-import "@fontsource/lora/500.css";
-import "@fontsource/lora/600.css";
-import "@fontsource/lora/700.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -16,7 +10,7 @@ import { getPreference } from "@/server/server-actions";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
 import { ReactQueryProvider } from "@/providers/query-client-provider";
 import { AuthProvider } from "@/providers/auth-provider";
-import { THEME_MODE_VALUES, THEME_PRESET_VALUES, type ThemePreset, type ThemeMode } from "@/types/preferences/theme";
+import { THEME_MODE_VALUES, type ThemeMode } from "@/types/preferences/theme";
 
 import "./globals.css";
 
@@ -47,20 +41,18 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const themeMode = await getPreference<ThemeMode>("theme_mode", THEME_MODE_VALUES, "dark");
-  const themePreset = await getPreference<ThemePreset>("theme_preset", THEME_PRESET_VALUES, "modern-darker");
 
   return (
     <ClerkProvider>
       <html
         lang="en"
         className={themeMode === "dark" ? "dark" : ""}
-        data-theme-preset={themePreset}
         suppressHydrationWarning
       >
         <body className="min-h-screen antialiased">
           <ReactQueryProvider>
             <AuthProvider>
-              <PreferencesStoreProvider themeMode={themeMode} themePreset={themePreset}>
+              <PreferencesStoreProvider themeMode={themeMode}>
                 {children}
                 <Toaster />
               </PreferencesStoreProvider>

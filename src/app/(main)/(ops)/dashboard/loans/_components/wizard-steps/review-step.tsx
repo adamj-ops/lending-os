@@ -342,7 +342,7 @@ export function ReviewStep({ onBack }: ReviewStepProps) {
         transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
       >
         <div className="flex gap-2">
-          <IconAlertCircle size={20} stroke={2} className="size-5 text-amber-600 dark:text-amber-400" />
+          <IconAlertCircle size={20} stroke={2} className="size-5 text-brand-accent dark:text-amber-400" />
           <div className="flex-1">
             <p className="font-medium text-amber-900 dark:text-amber-100">Ready to Create Loan</p>
             <p className="text-sm text-amber-800 dark:text-amber-200">

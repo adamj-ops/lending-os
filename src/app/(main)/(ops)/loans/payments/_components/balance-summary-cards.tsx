@@ -75,8 +75,8 @@ export function BalanceSummaryCards({
             original
           </p>
           <div className="mt-2 flex items-center gap-2">
-            <IconTrendingDown size={20} stroke={2} className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-600">
+            <IconTrendingDown size={20} stroke={2} className="h-4 w-4 text-brand-success" />
+            <span className="text-sm font-medium text-brand-success">
               {metrics.principalPaidPercent}% paid down
             </span>
           </div>
@@ -146,12 +146,12 @@ export function BalanceSummaryCards({
               </Badge>
             )}
             {balance.paymentsMissed > 0 && (
-              <Badge variant="secondary" className="bg-red-500/10 text-red-700">
+              <Badge variant="secondary" className="bg-brand-danger/10 text-red-700">
                 {balance.paymentsMissed} missed
               </Badge>
             )}
             {balance.isDelinquent && (
-              <Badge variant="secondary" className="bg-red-500/10 text-red-700">
+              <Badge variant="secondary" className="bg-brand-danger/10 text-red-700">
                 Delinquent
               </Badge>
             )}
@@ -185,8 +185,8 @@ export function BalanceSummaryCards({
                 <div className="mt-2 flex items-center gap-2">
                   {balance.daysUntilNextPayment < 0 ? (
                     <>
-                      <IconAlertCircle size={20} stroke={2} className="h-4 w-4 text-red-600" />
-                      <span className="text-sm font-medium text-red-600">
+                      <IconAlertCircle size={20} stroke={2} className="h-4 w-4 text-brand-danger" />
+                      <span className="text-sm font-medium text-brand-danger">
                         {Math.abs(balance.daysUntilNextPayment)} days overdue
                       </span>
                     </>

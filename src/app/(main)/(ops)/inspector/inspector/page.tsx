@@ -234,13 +234,13 @@ export default function InspectorDashboard({ className }: InspectorDashboardProp
             <div className="text-xs text-muted-foreground">Pending</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-green-600">
+            <div className="text-lg font-bold text-brand-success">
               {inspections.filter(i => i.status === InspectionStatus.COMPLETED).length}
             </div>
             <div className="text-xs text-muted-foreground">Completed</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-yellow-600">
+            <div className="text-lg font-bold text-brand-accent">
               {inspections.filter(i => !(i as any).synced).length}
             </div>
             <div className="text-xs text-muted-foreground">Offline</div>

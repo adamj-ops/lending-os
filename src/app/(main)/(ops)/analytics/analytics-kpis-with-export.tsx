@@ -112,13 +112,13 @@ export function AnalyticsKpisWithExport({ filters, startDate, endDate }: Analyti
       value: `$${fundData?.kpis?.capitalDeployed || '0'}`,
       icon: DollarSign,
       badge: {
-        color: 'border border-green-600 text-green-600 dark:border-green-400 dark:text-green-400',
+        color: 'border border-green-600 text-brand-success dark:border-green-400 dark:text-green-400',
         icon: TrendingUp,
         iconColor: 'text-green-500',
         text: '+12.4%',
       },
       subtext: (
-        <span className="text-green-600 font-medium dark:text-green-400">
+        <span className="text-brand-success font-medium dark:text-green-400">
           +${fundData?.kpis?.capitalDeployed ? (parseFloat(fundData.kpis.capitalDeployed) * 0.124).toFixed(2) + 'k' : '0'}{' '}
           <span className="text-muted-foreground font-normal">vs prev. 60 days</span>
         </span>
@@ -163,13 +163,13 @@ export function AnalyticsKpisWithExport({ filters, startDate, endDate }: Analyti
         : '0'}%`,
       icon: TrendingUp,
       badge: {
-        color: 'border border-green-600 text-green-600 dark:border-green-400 dark:text-green-400',
+        color: 'border border-green-600 text-brand-success dark:border-green-400 dark:text-green-400',
         icon: TrendingUp,
         iconColor: 'text-green-500',
         text: '+2.8%',
       },
       subtext: (
-        <span className="text-green-600 font-medium dark:text-green-400">
+        <span className="text-brand-success font-medium dark:text-green-400">
           ${paymentData?.kpis?.amountReceived || '0'} received{' '}
           <span className="text-muted-foreground font-normal">of ${paymentData?.kpis?.amountScheduled || '0'}</span>
         </span>
@@ -190,14 +190,14 @@ export function AnalyticsKpisWithExport({ filters, startDate, endDate }: Analyti
       icon: AlertTriangle,
       badge: {
         color: loanData?.kpis?.delinquentCount > 0
-          ? 'border border-red-600 text-red-600 dark:border-red-400 dark:text-red-400'
-          : 'border border-green-600 text-green-600 dark:border-green-400 dark:text-green-400',
+          ? 'border border-red-600 text-brand-danger dark:border-red-400 dark:text-red-400'
+          : 'border border-green-600 text-brand-success dark:border-green-400 dark:text-green-400',
         icon: loanData?.kpis?.delinquentCount > 0 ? TrendingUp : TrendingDown,
-        iconColor: loanData?.kpis?.delinquentCount > 0 ? 'text-red-500' : 'text-green-500',
+        iconColor: loanData?.kpis?.delinquentCount > 0 ? 'text-brand-danger' : 'text-green-500',
         text: loanData?.kpis?.delinquentCount > 0 ? `${loanData.kpis.delinquentCount} loans` : '0 loans',
       },
       subtext: (
-        <span className={loanData?.kpis?.delinquentCount > 0 ? "text-red-600 font-medium dark:text-red-400" : "text-green-600 font-medium dark:text-green-400"}>
+        <span className={loanData?.kpis?.delinquentCount > 0 ? "text-brand-danger font-medium dark:text-red-400" : "text-brand-success font-medium dark:text-green-400"}>
           {loanData?.kpis?.delinquentCount || 0} delinquent{' '}
           <span className="text-muted-foreground font-normal">of {loanData?.kpis?.activeCount || 0} active</span>
         </span>

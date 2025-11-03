@@ -22,8 +22,8 @@ export function MetricCard({ title, value, change, trend }: MetricCardProps) {
             <div
               className={cn(
                 "flex items-center text-sm",
-                trend === "up" && "text-green-600",
-                trend === "down" && "text-red-600",
+                trend === "up" && "text-brand-success",
+                trend === "down" && "text-brand-danger",
                 trend === "neutral" && "text-muted-foreground"
               )}
             >

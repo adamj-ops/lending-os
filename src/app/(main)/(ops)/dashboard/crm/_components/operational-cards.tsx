@@ -93,7 +93,7 @@ export function OperationalCards() {
                     className={cn(
                       "w-fit rounded-md px-2 py-1 text-xs font-medium",
                       item.priority === "High" && "text-destructive bg-destructive/20",
-                      item.priority === "Medium" && "bg-yellow-500/20 text-yellow-500",
+                      item.priority === "Medium" && "bg-brand-accent/20 text-yellow-500",
                       item.priority === "Low" && "bg-green-500/20 text-green-500",
                     )}
                   >

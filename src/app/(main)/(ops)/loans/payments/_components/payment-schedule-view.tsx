@@ -45,7 +45,7 @@ const statusColors = {
   scheduled: "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20",
   paid: "bg-green-500/10 text-green-700 hover:bg-green-500/20",
   late: "bg-orange-500/10 text-orange-700 hover:bg-orange-500/20",
-  missed: "bg-red-500/10 text-red-700 hover:bg-red-500/20",
+  missed: "bg-brand-danger/10 text-red-700 hover:bg-brand-danger/20",
 };
 
 export function PaymentScheduleView({

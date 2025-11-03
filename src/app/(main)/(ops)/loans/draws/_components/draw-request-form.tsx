@@ -345,7 +345,7 @@ export function DrawRequestForm({
               <span
                 className={cn(
                   "font-bold",
-                  totalsMatch ? "text-green-600" : "text-destructive"
+                  totalsMatch ? "text-brand-success" : "text-destructive"
                 )}
               >
                 ${lineItemsTotal.toFixed(2)}

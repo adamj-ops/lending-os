@@ -63,7 +63,7 @@ export default function FundAnalyticsPage() {
       label: "Active Funds",
       value: `${portfolio.activeFunds} / ${portfolio.totalFunds}`,
       icon: <IconTrendingUp size={20} stroke={2} className="h-4 w-4" />,
-      color: "text-green-600 bg-green-100",
+      color: "text-brand-success bg-green-100",
     },
     {
       label: "Portfolio IRR",
@@ -75,7 +75,7 @@ export default function FundAnalyticsPage() {
       label: "Portfolio MOIC",
       value: portfolio.portfolioMOIC ? `${portfolio.portfolioMOIC.toFixed(2)}x` : "N/A",
       icon: <Award className="h-4 w-4" />,
-      color: "text-yellow-600 bg-yellow-100",
+      color: "text-brand-accent bg-yellow-100",
     },
   ];
 

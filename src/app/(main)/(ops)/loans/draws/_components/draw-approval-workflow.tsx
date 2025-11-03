@@ -344,21 +344,21 @@ export function DrawApprovalWorkflow({
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-brand-success" />
                   <span className="text-sm">Work description provided</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-brand-success" />
                   <span className="text-sm">Budget line items documented</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-brand-success" />
                   <span className="text-sm">Amounts verified and balanced</span>
                 </div>
                 {draw.inspectionRequired && (
                   <div className="flex items-center gap-3">
                     {draw.inspectionStatus === "completed" ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <CheckCircle2 className="h-5 w-5 text-brand-success" />
                     ) : (
                       <IconClock size={20} stroke={2} className="h-5 w-5 text-orange-600" />
                     )}
@@ -366,7 +366,7 @@ export function DrawApprovalWorkflow({
                   </div>
                 )}
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-brand-success" />
                   <span className="text-sm">Within budget limits</span>
                 </div>
               </div>

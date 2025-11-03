@@ -102,7 +102,7 @@ export function CommitmentsTab({ fundId }: CommitmentsTabProps) {
         const net = row.original.netPosition;
         const isPositive = net < 0;
         return (
-          <div className={isPositive ? "text-green-600 tabular-nums" : "tabular-nums"}>
+          <div className={isPositive ? "text-brand-success tabular-nums" : "tabular-nums"}>
             {formatCurrency(Math.abs(net))}
           </div>
         );

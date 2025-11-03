@@ -32,11 +32,11 @@ export function MetricCard({
     
     switch (change.type) {
       case 'increase':
-        return <IconTrendingUp size={20} stroke={2} className="h-4 w-4 text-green-600" />;
+        return <IconTrendingUp size={20} stroke={2} className="h-4 w-4 text-brand-success" />;
       case 'decrease':
-        return <IconTrendingDown size={20} stroke={2} className="h-4 w-4 text-red-600" />;
+        return <IconTrendingDown size={20} stroke={2} className="h-4 w-4 text-brand-danger" />;
       case 'neutral':
-        return <IconMinus size={16} stroke={2} className="h-4 w-4 text-gray-600" />;
+        return <IconMinus size={16} stroke={2} className="h-4 w-4 text-brand-muted" />;
       default:
         return null;
     }
@@ -47,11 +47,11 @@ export function MetricCard({
     
     switch (change.type) {
       case 'increase':
-        return 'text-green-600';
+        return 'text-brand-success';
       case 'decrease':
-        return 'text-red-600';
+        return 'text-brand-danger';
       case 'neutral':
-        return 'text-gray-600';
+        return 'text-brand-muted';
       default:
         return '';
     }
@@ -60,17 +60,17 @@ export function MetricCard({
   return (
     <Card className={cn("", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">
+        <CardTitle className="text-sm font-medium text-brand-muted">
           {title}
         </CardTitle>
         {icon && (
-          <div className="text-gray-400">
+          <div className="text-brand-muted/70">
             {icon}
           </div>
         )}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold text-brand-text">{value}</div>
         {change && (
           <div className={cn("flex items-center gap-1 text-xs", getTrendColor())}>
             {getTrendIcon()}
@@ -78,12 +78,12 @@ export function MetricCard({
               {change.value > 0 ? '+' : ''}{change.value}%
             </span>
             {change.period && (
-              <span className="text-gray-500">vs {change.period}</span>
+              <span className="text-brand-muted">vs {change.period}</span>
             )}
           </div>
         )}
         {description && (
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
+          <p className="text-xs text-brand-muted mt-1">{description}</p>
         )}
       </CardContent>
     </Card>
@@ -111,12 +111,12 @@ export function StatusMetric({
   return (
     <Card className={cn("", className)}>
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-gray-600">
+        <CardTitle className="text-sm font-medium text-brand-muted">
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold mb-4">{total}</div>
+        <div className="text-2xl font-bold text-brand-text mb-4">{total}</div>
         <div className="space-y-2">
           {breakdown.map((item, index) => (
             <div key={index} className="flex items-center justify-between">
@@ -126,11 +126,11 @@ export function StatusMetric({
                     {item.icon}
                   </div>
                 )}
-                <span className="text-sm text-gray-600">{item.label}</span>
+                <span className="text-sm text-brand-muted">{item.label}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{item.value}</span>
-                <div className="w-16 bg-gray-200 rounded-full h-2">
+                <span className="text-sm font-medium text-brand-text">{item.value}</span>
+                <div className="w-16 bg-muted rounded-full h-2">
                   <div
                     className={cn("h-2 rounded-full", item.color)}
                     style={{ width: `${(item.value / total) * 100}%` }}
@@ -165,9 +165,9 @@ export function DashboardLayout({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-3xl font-bold text-brand-text">{title}</h1>
           {subtitle && (
-            <p className="text-gray-600 mt-1">{subtitle}</p>
+            <p className="text-brand-muted mt-1">{subtitle}</p>
           )}
         </div>
         {actions && (
@@ -204,8 +204,8 @@ export function QuickStats({ stats, className }: QuickStatsProps) {
                 {stat.icon}
               </div>
               <div>
-                <div className="text-lg font-bold">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
+                <div className="text-lg font-bold text-brand-text">{stat.value}</div>
+                <div className="text-sm text-brand-muted">{stat.label}</div>
               </div>
             </div>
           </CardContent>
@@ -215,26 +215,26 @@ export function QuickStats({ stats, className }: QuickStatsProps) {
   );
 }
 
-// Common metric configurations
+// Common metric configurations - updated with Colosseum brand colors
 export const METRIC_CONFIGS = {
   payment: {
     icon: <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4" />,
-    color: "text-blue-600 bg-blue-100"
+    color: "text-brand-primary bg-brand-primary/10"
   },
   draw: {
     icon: <IconCalendar size={20} stroke={2} className="h-4 w-4" />,
-    color: "text-green-600 bg-green-100"
+    color: "text-brand-success bg-brand-success/10"
   },
   inspection: {
     icon: <IconCircleCheck size={20} stroke={2} className="h-4 w-4" />,
-    color: "text-yellow-600 bg-yellow-100"
+    color: "text-brand-accent bg-brand-accent/10"
   },
   deadline: {
     icon: <IconAlertCircle size={20} stroke={2} className="h-4 w-4" />,
-    color: "text-red-600 bg-red-100"
+    color: "text-brand-danger bg-brand-danger/10"
   },
   pending: {
     icon: <IconClock size={20} stroke={2} className="h-4 w-4" />,
-    color: "text-gray-600 bg-gray-100"
+    color: "text-brand-muted bg-brand-muted/10"
   }
 };

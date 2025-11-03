@@ -119,7 +119,7 @@ export function PaymentDrawCalendar({
         {event.status && (
           <div className="flex items-center gap-1 mt-1">
             {event.status === 'completed' && <IconCircleCheck size={20} stroke={2} className="h-3 w-3 text-green-500" />}
-            {event.status === 'overdue' && <IconAlertCircle size={20} stroke={2} className="h-3 w-3 text-red-500" />}
+            {event.status === 'overdue' && <IconAlertCircle size={20} stroke={2} className="h-3 w-3 text-brand-danger" />}
             <span className="capitalize">{event.status}</span>
           </div>
         )}
@@ -180,19 +180,19 @@ export function PaymentDrawCalendar({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{eventStats.payments}</div>
-              <div className="text-sm text-gray-600">Payments</div>
+              <div className="text-sm text-brand-muted">Payments</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{eventStats.draws}</div>
-              <div className="text-sm text-gray-600">Draws</div>
+              <div className="text-2xl font-bold text-brand-success">{eventStats.draws}</div>
+              <div className="text-sm text-brand-muted">Draws</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{eventStats.inspections}</div>
-              <div className="text-sm text-gray-600">Inspections</div>
+              <div className="text-2xl font-bold text-brand-accent">{eventStats.inspections}</div>
+              <div className="text-sm text-brand-muted">Inspections</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{eventStats.deadlines}</div>
-              <div className="text-sm text-gray-600">Deadlines</div>
+              <div className="text-2xl font-bold text-brand-danger">{eventStats.deadlines}</div>
+              <div className="text-sm text-brand-muted">Deadlines</div>
             </div>
           </div>
 
@@ -291,11 +291,11 @@ export function EventDetailsModal({
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-100';
-      case 'overdue': return 'text-red-600 bg-red-100';
-      case 'pending': return 'text-yellow-600 bg-yellow-100';
-      case 'cancelled': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'completed': return 'text-brand-success bg-green-100';
+      case 'overdue': return 'text-brand-danger bg-red-100';
+      case 'pending': return 'text-brand-accent bg-yellow-100';
+      case 'cancelled': return 'text-brand-muted bg-gray-100';
+      default: return 'text-brand-muted bg-gray-100';
     }
   };
 
@@ -326,7 +326,7 @@ export function EventDetailsModal({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <IconCalendar size={20} stroke={2} className="h-4 w-4 text-gray-500" />
+              <IconCalendar size={20} stroke={2} className="h-4 w-4 text-brand-muted" />
               <span className="text-sm">
                 {new Date(event.start).toLocaleDateString()}
                 {event.end && ` - ${new Date(event.end).toLocaleDateString()}`}
@@ -335,7 +335,7 @@ export function EventDetailsModal({
             
             {event.amount && (
               <div className="flex items-center gap-2">
-                <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4 text-gray-500" />
+                <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4 text-brand-muted" />
                 <span className="text-sm font-medium">
                   ${event.amount.toLocaleString()}
                 </span>
@@ -351,7 +351,7 @@ export function EventDetailsModal({
             )}
             
             {event.description && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-brand-muted">
                 {event.description}
               </div>
             )}

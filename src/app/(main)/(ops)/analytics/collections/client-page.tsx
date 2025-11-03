@@ -142,7 +142,7 @@ export function CollectionsAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{collectionRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-brand-success">{collectionRate.toFixed(1)}%</div>
           </CardContent>
         </Card>
 
@@ -154,7 +154,7 @@ export function CollectionsAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{data?.kpis?.lateCount || 0}</div>
+            <div className="text-2xl font-bold text-brand-danger">{data?.kpis?.lateCount || 0}</div>
           </CardContent>
         </Card>
 

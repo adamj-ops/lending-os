@@ -19,7 +19,7 @@ const delinquencyData = [
     label: "Past Due (31-60)",
     count: 4,
     total: 24,
-    color: "bg-yellow-500",
+    color: "bg-brand-accent",
   },
   {
     id: 3,
@@ -33,7 +33,7 @@ const delinquencyData = [
     label: "Default",
     count: 0,
     total: 24,
-    color: "bg-red-500",
+    color: "bg-brand-danger",
   },
 ];
 

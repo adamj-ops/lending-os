@@ -140,7 +140,7 @@ export function InspectionsAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{data?.kpis?.completedCount || 0}</div>
+            <div className="text-2xl font-bold text-brand-success">{data?.kpis?.completedCount || 0}</div>
           </CardContent>
         </Card>
 

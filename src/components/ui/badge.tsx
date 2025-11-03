@@ -22,15 +22,20 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-foreground',
-        secondary: 'bg-secondary text-secondary-foreground',
-        success:
-          'bg-[var(--color-success-accent,var(--color-green-500))] text-[var(--color-success-foreground,var(--color-white))]',
-        warning:
-          'bg-[var(--color-warning-accent,var(--color-yellow-500))] text-[var(--color-warning-foreground,var(--color-white))]',
-        info: 'bg-[var(--color-info-accent,var(--color-violet-500))] text-[var(--color-info-foreground,var(--color-white))]',
-        outline: 'bg-transparent border border-border text-secondary-foreground',
-        destructive: 'bg-destructive text-destructive-foreground',
+        // COLOSSEUM BRAND COLORS
+        primary: 'bg-brand-primary-500 text-slate-900 font-semibold',
+        success: 'bg-brand-success-500 text-white font-semibold',
+        warning: 'bg-brand-accent-500 text-white font-semibold',  // Orange
+        danger: 'bg-brand-danger-500 text-white font-semibold',
+        destructive: 'bg-brand-danger-500 text-white font-semibold',
+        
+        // NEUTRAL
+        secondary: 'bg-slate-800 text-slate-100 border border-slate-700',
+        outline: 'bg-transparent border border-brand-primary-500 text-brand-primary-500',
+        ghost: 'bg-transparent text-slate-100',
+        
+        // LEGACY (discouraged)
+        info: 'bg-blue-500 text-white',
       },
       appearance: {
         default: '',

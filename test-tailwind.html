@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html class="dark">
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          primary: '#00d1b2',
+          accent: '#f97316',
+          success: '#10b981',
+          danger: '#ef4444',
+          bg: '#0a0a0a',
+          surface: '#111827',
+          text: '#f1f5f9',
+          muted: '#64748b',
+        }
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-brand-bg p-8">
+  <h1 class="text-brand-text text-4xl mb-4">Colosseum Test</h1>
+  <button class="bg-brand-primary text-slate-900 px-4 py-2 rounded">Cyan Button</button>
+  <span class="bg-brand-accent text-white px-3 py-1 rounded ml-2">Orange Badge</span>
+  <p class="text-brand-muted mt-4">This is muted text</p>
+</body>
+</html>

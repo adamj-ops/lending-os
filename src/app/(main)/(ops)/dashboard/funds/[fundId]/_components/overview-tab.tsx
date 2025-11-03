@@ -33,7 +33,7 @@ export function OverviewTab({ fund }: OverviewTabProps) {
       label: "Committed",
       value: formatCurrency(parseFloat(fund.totalCommitted)),
       icon: <IconUsers size={20} stroke={2} className="h-4 w-4" />,
-      color: "text-green-600 bg-green-100",
+      color: "text-brand-success bg-green-100",
     },
     {
       label: "Deployed",
@@ -45,7 +45,7 @@ export function OverviewTab({ fund }: OverviewTabProps) {
       label: "Returned",
       value: formatCurrency(parseFloat(fund.totalReturned)),
       icon: <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4" />,
-      color: "text-yellow-600 bg-yellow-100",
+      color: "text-brand-accent bg-yellow-100",
     },
   ];
 
