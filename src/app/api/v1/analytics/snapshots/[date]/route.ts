@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
@@ -9,6 +9,8 @@ import {
 } from "@/db/schema";
 import { AnalyticsService } from "@/services/analytics.service";
 import { requireOrganization } from "@/lib/clerk-server";
+import { ok, badRequest, unauthorized, serverError } from "@/lib/api-response";
+import { withRequestLogging } from "@/lib/api-logger";
 
 export const revalidate = 300; // ISR for 5 minutes
 
@@ -18,20 +20,17 @@ export const revalidate = 300; // ISR for 5 minutes
  * Get comprehensive snapshot data for a specific date
  * Supports query parameters for filtering by entity types
  */
-export async function GET(
+export const GET = withRequestLogging(async (
   req: NextRequest,
   { params }: { params: Promise<{ date: string }> }
-) {
+) => {
   try {
     const session = await requireOrganization();
     const { date } = await params;
 
     // Validate date format (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return NextResponse.json(
-        { error: "Invalid date format. Expected YYYY-MM-DD" },
-        { status: 400 }
-      );
+      return badRequest("Invalid date format. Expected YYYY-MM-DD");
     }
 
     const url = new URL(req.url);
@@ -125,7 +124,7 @@ export async function GET(
       },
     };
 
-    return NextResponse.json(payload, {
+    return ok(payload, {
       headers: {
         "Cache-Control": "s-maxage=300, stale-while-revalidate=600",
         "X-Cache-Tags": `analytics:snapshots:${date},analytics:*`,
@@ -133,13 +132,9 @@ export async function GET(
     });
   } catch (err: any) {
     if (err instanceof Error && err.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized();
     }
 
-    return NextResponse.json(
-      { error: "Failed to load snapshot data", details: err?.message || String(err) },
-      { status: 500 }
-    );
+    return serverError("Failed to load snapshot data", err?.message || String(err));
   }
-}
-
+});

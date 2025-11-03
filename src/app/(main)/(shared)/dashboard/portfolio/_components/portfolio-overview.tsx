@@ -1,10 +1,10 @@
 "use client";
 
 import { IconCurrencyDollar, IconTrendingUp, IconActivity } from "@tabler/icons-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import dynamic from "next/dynamic";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartConfig } from "@/components/ui/chart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { chartColors } from "@/lib/chart-colors";
@@ -97,25 +97,10 @@ export function PortfolioOverview() {
           </div>
         </div>
         <Separator />
-        <ChartContainer className="max-h-72 w-full" config={chartConfig}>
-          <BarChart margin={{ left: -25, right: 0, top: 25, bottom: 0 }} accessibilityLayer data={chartData}>
-            <CartesianGrid vertical={false} opacity={0.1} />
-            <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tickMargin={8}
-              tickFormatter={(value) =>
-                `${value >= 1000000 ? value / 1000000 + "M" : value >= 1000 ? value / 1000 + "k" : value}`
-              }
-              domain={[0, 5000000]}
-            />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="principal" stackId="a" fill={chartConfig.principal.color} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="interest" stackId="a" fill={chartConfig.interest.color} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="fees" stackId="a" fill={chartConfig.fees.color} radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ChartContainer>
+        {(() => {
+          const Chart = dynamic(() => import('./portfolio-overview-chart'), { ssr: false });
+          return <Chart data={chartData} config={chartConfig} />;
+        })()}
       </CardContent>
     </Card>
   );

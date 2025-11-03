@@ -12,3 +12,7 @@ Existing files to migrate here:
 - GIT-COMMIT-GUIDE.md
 - COMPONENT-INSTALLATION-CHECKLIST.md
 
+Environment
+-----------
+- Copy `.env.example` to `.env.local` and fill in required values.
+- See also `src/lib/env.ts` for validated required variables.

@@ -2,15 +2,17 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { AlertService } from "@/services/alert.service";
 import { requireOrganization } from "@/lib/clerk-server";
+import { withRequestLogging } from "@/lib/api-logger";
+import { ok, notFound, serverError } from "@/lib/api-response";
 
 /**
  * POST /api/v1/alerts/[alertId]/read
  * Mark an alert as read
  */
-export async function POST(
+export const POST = withRequestLogging(async (
   req: NextRequest,
   { params }: { params: Promise<{ alertId: string }> }
-) {
+) => {
   try {
     const session = await requireOrganization();
     const { alertId } = await params;
@@ -19,24 +21,14 @@ export async function POST(
     // AlertService will verify entity ownership before marking as read
     const alert = await AlertService.markAsRead(alertId, session.organizationId);
 
-    return NextResponse.json({
-      success: true,
-      alert
-    });
+    return ok({ success: true, alert });
   } catch (error) {
     console.error("Error marking alert as read:", error);
 
     if (error instanceof Error && error.message === 'Alert not found') {
-      return NextResponse.json(
-        { error: "Alert not found" },
-        { status: 404 }
-      );
+      return notFound("Alert not found");
     }
 
-    return NextResponse.json(
-      { error: "Failed to mark alert as read", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    return serverError("Failed to mark alert as read", error instanceof Error ? error.message : String(error));
   }
-}
-
+});

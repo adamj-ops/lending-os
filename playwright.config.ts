@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], storageState: process.env.E2E_STORAGE_STATE || undefined } },
   ],
   webServer: {
     command: 'npm run dev',
@@ -20,4 +20,3 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
   },
 });
-

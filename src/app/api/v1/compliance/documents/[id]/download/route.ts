@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignatureService } from "@/services/signature.service";
 import { DocuSignAdapter, createDocuSignAdapter } from "@/integrations/signature/docusign.adapter";
+import { withRequestLogging } from "@/lib/api-logger";
+import { badRequest, notFound, serverError } from "@/lib/api-response";
 
 /**
  * Download Signed Document API
@@ -8,27 +10,17 @@ import { DocuSignAdapter, createDocuSignAdapter } from "@/integrations/signature
  * GET /api/v1/compliance/documents/:id/download - Download signed document
  */
 
-export async function GET(
+export const GET = withRequestLogging(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   try {
     const { id: signatureId } = await params;
     const signature = await SignatureService.getSignature(signatureId);
 
-    if (!signature) {
-      return NextResponse.json(
-        { error: "Signature not found" },
-        { status: 404 }
-      );
-    }
+    if (!signature) return notFound("Signature not found");
 
-    if (signature.status !== "completed") {
-      return NextResponse.json(
-        { error: "Document not yet completed" },
-        { status: 400 }
-      );
-    }
+    if (signature.status !== "completed") return badRequest("Document not yet completed");
 
     // Get adapter
     const adapter = createDocuSignAdapter({
@@ -51,11 +43,7 @@ export async function GET(
     });
   } catch (error) {
     console.error("[Download API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to download document" },
-      { status: 500 }
-    );
+    return serverError("Failed to download document");
   }
-}
-
+});
 

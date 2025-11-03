@@ -2,7 +2,7 @@
 
 import { IconDots } from "@tabler/icons-react";
 import { ShoppingBasket, TramFront } from "lucide-react";
-import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
+import dynamic from "next/dynamic";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -38,58 +38,10 @@ export function ExpenseSummary() {
 
         <div className="h-32">
           <ChartContainer config={chartConfig}>
-            <RadialBarChart
-              margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
-              data={chartData}
-              endAngle={180}
-              innerRadius={80}
-              outerRadius={130}
-            >
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                      return (
-                        <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy ?? 0) - 16}
-                            className="fill-foreground text-2xl font-bold tabular-nums"
-                          >
-                            {formatCurrency(totalExpenses)}
-                          </tspan>
-                          <tspan x={viewBox.cx} y={(viewBox.cy ?? 0) + 4} className="fill-muted-foreground">
-                            Spent
-                          </tspan>
-                        </text>
-                      );
-                    }
-                  }}
-                />
-              </PolarRadiusAxis>
-              <RadialBar
-                dataKey="other"
-                stackId="a"
-                cornerRadius={4}
-                fill="var(--color-other)"
-                className="stroke-card stroke-4"
-              />
-              <RadialBar
-                dataKey="transport"
-                stackId="a"
-                cornerRadius={4}
-                fill="var(--color-transport)"
-                className="stroke-card stroke-4"
-              />
-              <RadialBar
-                dataKey="groceries"
-                stackId="a"
-                cornerRadius={4}
-                fill="var(--color-groceries)"
-                className="stroke-card stroke-4"
-              />
-            </RadialBarChart>
+            {(() => {
+              const Radial = dynamic(() => import('./expense-summary.radial'), { ssr: false });
+              return <Radial data={chartData} total={totalExpenses} />;
+            })()}
           </ChartContainer>
         </div>
         <Separator />

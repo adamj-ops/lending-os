@@ -1,6 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { SignatureService } from "@/services/signature.service";
 import { DocuSignAdapter, createDocuSignAdapter } from "@/integrations/signature/docusign.adapter";
+import { withRequestLogging } from "@/lib/api-logger";
+import { created, ok, badRequest, serverError, unprocessable } from "@/lib/api-response";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
 /**
  * Document Management API
@@ -9,18 +13,22 @@ import { DocuSignAdapter, createDocuSignAdapter } from "@/integrations/signature
  * GET /api/v1/compliance/documents - List documents
  */
 
-export async function POST(request: NextRequest) {
+export const POST = withRequestLogging(async (request: NextRequest) => {
   try {
-    const body = await request.json();
-    const { organizationId, documentType, documentId, loanId, fundId, signers, templateId } = body;
-
-    // Validate required fields
-    if (!organizationId || !documentType || !signers || !Array.isArray(signers)) {
-      return NextResponse.json(
-        { error: "Missing required fields: organizationId, documentType, signers" },
-        { status: 400 }
-      );
-    }
+    const body = await parseJsonBody(
+      z.object({
+        organizationId: z.string().uuid(),
+        documentType: z.string().min(1),
+        documentId: z.string().uuid().optional(),
+        loanId: z.string().uuid().optional(),
+        fundId: z.string().uuid().optional(),
+        signers: z.array(z.object({ email: z.string().email(), name: z.string().min(1), role: z.string().min(1), order: z.number().int().optional() })),
+        templateId: z.string().optional(),
+      }),
+      request
+    );
+    if (!body.success) return unprocessable("Invalid request body", body.issues);
+    const { organizationId, documentType, documentId, loanId, fundId, signers, templateId } = body.data;
 
     // Create signature record
     const signature = await SignatureService.createEnvelope({
@@ -61,25 +69,14 @@ export async function POST(request: NextRequest) {
       await SignatureService.updateStatus(signature.id, { status: "sent" });
     }
 
-    return NextResponse.json(
-      {
-        id: signature.id,
-        envelopeId: envelope.envelopeId,
-        status: signature.status,
-        documentUrl: envelope.uri,
-      },
-      { status: 201 }
-    );
+    return created({ id: signature.id, envelopeId: envelope.envelopeId, status: signature.status, documentUrl: envelope.uri });
   } catch (error) {
     console.error("[Documents API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to create document signature" },
-      { status: 500 }
-    );
+    return serverError("Failed to create document signature");
   }
-}
+});
 
-export async function GET(request: NextRequest) {
+export const GET = withRequestLogging(async (request: NextRequest) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const organizationId = searchParams.get("organizationId");
@@ -87,10 +84,7 @@ export async function GET(request: NextRequest) {
     const fundId = searchParams.get("fundId");
 
     if (!organizationId) {
-      return NextResponse.json(
-        { error: "Missing organizationId" },
-        { status: 400 }
-      );
+      return badRequest("Missing organizationId");
     }
 
     let signatures;
@@ -100,20 +94,13 @@ export async function GET(request: NextRequest) {
     } else if (fundId) {
       signatures = await SignatureService.getSignaturesByFundId(fundId);
     } else {
-      return NextResponse.json(
-        { error: "Must provide loanId or fundId" },
-        { status: 400 }
-      );
+      return badRequest("Must provide loanId or fundId");
     }
 
-    return NextResponse.json({ signatures }, { status: 200 });
+    return ok({ signatures });
   } catch (error) {
     console.error("[Documents API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch documents" },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch documents");
   }
-}
-
+});
 

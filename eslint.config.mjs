@@ -88,6 +88,8 @@ export default defineConfig([
           caseSensitive: true,
         },
       ],
+      // Discourage parent-relative imports; prefer path aliases ("@/*")
+      "import/no-relative-parent-imports": "error",
       "no-duplicate-imports": ["error", { includeExports: true }],
       "import/no-cycle": ["error", { maxDepth: 2 }],
 

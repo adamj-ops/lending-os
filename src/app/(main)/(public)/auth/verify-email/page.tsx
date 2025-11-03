@@ -235,9 +235,9 @@ export default function VerifyEmailPage() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.push("/auth/v2/register")}
+            onClick={() => router.push("/auth/login")}
           >
-            Back to registration
+            Back to login
           </Button>
         </div>
       </div>

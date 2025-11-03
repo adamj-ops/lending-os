@@ -4,10 +4,12 @@ import { db } from "@/db/client";
 import { eventIngest } from "@/db/schema/analytics";
 import { desc, gt, sql, and } from "drizzle-orm";
 import { requireOrganization } from "@/lib/clerk-server";
+import { ok, serverError } from "@/lib/api-response";
+import { withRequestLogging } from "@/lib/api-logger";
 
 export const revalidate = 0; // No caching for real-time events
 
-export async function GET(req: NextRequest) {
+export const GET = withRequestLogging(async (req: NextRequest) => {
   try {
     const session = await requireOrganization();
     const { searchParams } = new URL(req.url);
@@ -35,17 +37,13 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(eventIngest.occurredAt))
       .limit(Math.min(limit, 100)); // Cap at 100 for safety
 
-    return NextResponse.json({
+    return ok({
       events,
       timestamp: new Date().toISOString(),
       count: events.length
     });
   } catch (error) {
     console.error("Error fetching recent events:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch recent events", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch recent events", error instanceof Error ? error.message : String(error));
   }
-}
-
+});

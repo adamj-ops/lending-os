@@ -30,7 +30,7 @@ This vertical integration enables:
 - Easier testing and maintainability
 - Event-driven automation across domains
 
-📖 **Read More**: [Domain Architecture v2.0](.cursor/docs/architecture/domain-architecture-v2.md)
+📖 **Read More**: [Domain Architecture v2.0](docs/architecture/domain-architecture-v2.md)
 
 ---
 
@@ -67,7 +67,7 @@ This vertical integration enables:
 - **Auth**: Iron-session (custom implementation)
 - **Tooling**: ESLint, Prettier, Husky
 
-📖 **Read More**: [Tech Stack Summary](.cursor/docs/technical/tech-stack-summary.md)
+📖 **Read More**: [Tech Stack Summary](docs/technical/tech-stack-summary.md)
 
 ---
 
@@ -89,7 +89,7 @@ src/
 └── hooks/                     # Reusable React hooks
 ```
 
-📖 **Read More**: [File Structure Strategy](.cursor/docs/architecture/domain-architecture-v2.md#file-structure-strategy)
+📖 **Read More**: [File Structure Strategy](docs/architecture/domain-architecture-v2.md#file-structure-strategy)
 
 ---
 
@@ -120,6 +120,7 @@ src/
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
+   See `src/lib/env.ts` for validated required variables.
 
 4. **Run database migrations**
    ```bash
@@ -138,7 +139,7 @@ src/
 
 Your app will be running at [http://localhost:3000](http://localhost:3000)
 
-📖 **Read More**: [Environment Setup](.cursor/docs/technical/environment-setup.md)
+📖 **Read More**: [Environment Setup](docs/technical/environment-setup.md)
 
 ---
 
@@ -146,36 +147,36 @@ Your app will be running at [http://localhost:3000](http://localhost:3000)
 
 ### Architecture
 
-- [Domain Architecture v2.0](.cursor/docs/architecture/domain-architecture-v2.md)
-- [Event-Driven System](.cursor/docs/architecture/event-driven-system.md)
-- [Migration Guide v1 → v2](.cursor/docs/architecture/migration-v1-to-v2.md)
-- [Integration Adapters](.cursor/docs/architecture/integration-adapters.md)
-- [Monetization Strategy](.cursor/docs/architecture/monetization-strategy.md)
+- [Domain Architecture v2.0](docs/architecture/domain-architecture-v2.md)
+- [Event-Driven System](docs/architecture/event-driven-system.md)
+- [Migration Guide v1 → v2](docs/architecture/migration-v1-to-v2.md)
+- [Integration Adapters](docs/architecture/integration-adapters.md)
+- [Monetization Strategy](docs/architecture/monetization-strategy.md)
 
 ### Domain Documentation
 
-- [Loan Domain](.cursor/docs/domains/loan-domain.md)
-- [Payment Domain](.cursor/docs/domains/payment-domain.md)
-- [Borrower Domain](.cursor/docs/domains/borrower-domain.md)
-- [Fund Domain](.cursor/docs/domains/fund-domain.md) *(planned)*
-- [Compliance Domain](.cursor/docs/domains/compliance-domain.md) *(planned)*
+- [Loan Domain](docs/domains/loan-domain.md)
+- [Payment Domain](docs/domains/payment-domain.md)
+- [Borrower Domain](docs/domains/borrower-domain.md)
+- [Fund Domain](docs/domains/fund-domain.md) *(planned)*
+- [Compliance Domain](docs/domains/compliance-domain.md) *(planned)*
 
 ### Technical Docs
 
-- [Database Schema](.cursor/docs/technical/database-schema.md)
-- [API Endpoints](.cursor/docs/technical/api-endpoints.md)
-- [API Versioning](.cursor/docs/technical/api-versioning.md)
-- [AWS S3 Setup](.cursor/docs/technical/aws-s3-setup.md)
+- [Database Schema](docs/technical/database-schema.md)
+- [API Endpoints](docs/technical/api-endpoints.md)
+- [API Versioning](docs/technical/api-versioning.md)
+- [AWS S3 Setup](docs/technical/aws-s3-setup.md)
 
 ### Product Strategy
 
-- [Product Strategy Overview](.cursor/docs/product-strategy/) - Market research, competitive analysis, 90-day roadmap
-- [Gaps & Opportunities](.cursor/docs/product-strategy/gaps-and-opportunities.md) - Critical gaps and priorities
-- [90-Day Roadmap](.cursor/docs/product-strategy/90-day-roadmap.md) - Tactical implementation plan
-- [Competitive Analysis](.cursor/docs/product-strategy/competitive-analysis.md) - Competitor teardowns
-- [Market Intelligence](.cursor/docs/product-strategy/market-intelligence.md) - 2025 market research
-- [Product Backlog](.cursor/docs/product-strategy/product-backlog.md) - Prioritized feature backlog
-- [Pitch Materials](.cursor/docs/product-strategy/pitch-materials.md) - Pitch deck asset mapping
+- [Product Strategy Overview](docs/product-strategy/) - Market research, competitive analysis, 90-day roadmap
+- [Gaps & Opportunities](docs/product-strategy/gaps-and-opportunities.md) - Critical gaps and priorities
+- [90-Day Roadmap](docs/product-strategy/90-day-roadmap.md) - Tactical implementation plan
+- [Competitive Analysis](docs/product-strategy/competitive-analysis.md) - Competitor teardowns
+- [Market Intelligence](docs/product-strategy/market-intelligence.md) - 2025 market research
+- [Product Backlog](docs/product-strategy/product-backlog.md) - Prioritized feature backlog
+- [Pitch Materials](docs/product-strategy/pitch-materials.md) - Pitch deck asset mapping
 
 ### Development Rules
 

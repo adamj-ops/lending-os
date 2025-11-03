@@ -20,7 +20,7 @@ export default function SetupOrganizationPage() {
       <div className="absolute top-5 flex w-full justify-end px-10">
         <div className="text-muted-foreground text-sm">
           Already have access?{" "}
-          <Link className="text-foreground" href="/auth/v2/login">
+          <Link className="text-foreground" href="/auth/login">
             Sign In
           </Link>
         </div>

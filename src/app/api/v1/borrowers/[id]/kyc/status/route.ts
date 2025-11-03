@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { KYCService } from "@/services/kyc.service";
 import { PersonaAdapter, createPersonaAdapter } from "@/integrations/kyc/persona.adapter";
 import { BorrowerService } from "@/services/borrower.service";
+import { withRequestLogging } from "@/lib/api-logger";
+import { ok, notFound, serverError } from "@/lib/api-response";
 
 /**
  * KYC Status API
@@ -9,34 +11,23 @@ import { BorrowerService } from "@/services/borrower.service";
  * GET /api/v1/borrowers/:id/kyc/status - Get verification status
  */
 
-export async function GET(
+export const GET = withRequestLogging(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   try {
     const { id: borrowerId } = await params;
 
     // Get borrower
     const borrower = await BorrowerService.getBorrowerById(borrowerId);
-    if (!borrower) {
-      return NextResponse.json(
-        { error: "Borrower not found" },
-        { status: 404 }
-      );
-    }
+    if (!borrower) return notFound("Borrower not found");
 
     // Get latest verification
     const verifications = await KYCService.getVerificationsByBorrowerId(borrowerId);
     const latestVerification = verifications[0];
 
     if (!latestVerification) {
-      return NextResponse.json(
-        {
-          status: borrower.kycStatus || "pending",
-          verified: false,
-        },
-        { status: 200 }
-      );
+      return ok({ status: borrower.kycStatus || "pending", verified: false });
     }
 
     // Get latest status from provider
@@ -66,24 +57,17 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(
-      {
-        verificationId: latestVerification.id,
-        status: mappedStatus,
-        borrowerStatus: borrower.kycStatus,
-        submittedAt: latestVerification.submittedAt,
-        completedAt: latestVerification.completedAt,
-        verified: mappedStatus === "approved",
-      },
-      { status: 200 }
-    );
+    return ok({
+      verificationId: latestVerification.id,
+      status: mappedStatus,
+      borrowerStatus: borrower.kycStatus,
+      submittedAt: latestVerification.submittedAt,
+      completedAt: latestVerification.completedAt,
+      verified: mappedStatus === "approved",
+    });
   } catch (error) {
     console.error("[KYC Status API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to get KYC status" },
-      { status: 500 }
-    );
+    return serverError("Failed to get KYC status");
   }
-}
-
+});
 

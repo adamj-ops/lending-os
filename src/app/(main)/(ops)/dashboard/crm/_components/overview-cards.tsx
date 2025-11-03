@@ -2,7 +2,7 @@
 
 import { format, subMonths } from "date-fns";
 import { Wallet, BadgeDollarSign } from "lucide-react";
-import { Area, AreaChart, Line, LineChart, Bar, BarChart, XAxis } from "recharts";
+import dynamic from "next/dynamic";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -27,20 +27,7 @@ export function OverviewCards() {
           <CardDescription>Last Month</CardDescription>
         </CardHeader>
         <CardContent className="size-full">
-          <ChartContainer className="size-full min-h-24" config={leadsChartConfig}>
-            <BarChart accessibilityLayer data={leadsChartData} barSize={8}>
-              <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} hide />
-              <ChartTooltip content={<ChartTooltipContent labelFormatter={(label) => `${lastMonth}: ${label}`} />} />
-              <Bar
-                background={{ fill: "var(--color-background)", radius: 4, opacity: 0.07 }}
-                dataKey="newLeads"
-                stackId="a"
-                fill="var(--color-newLeads)"
-                radius={[0, 0, 0, 0]}
-              />
-              <Bar dataKey="disqualified" stackId="a" fill="var(--color-disqualified)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
+          {(() => { const Chart = dynamic(() => import('./overview-leads-chart'), { ssr: false }); return <Chart data={leadsChartData} />; })()}
         </CardContent>
         <CardFooter className="flex items-center justify-between">
           <span className="text-xl font-semibold tabular-nums">635</span>
@@ -54,29 +41,7 @@ export function OverviewCards() {
           <CardDescription>Last Month</CardDescription>
         </CardHeader>
         <CardContent className="flex-1 p-0">
-          <ChartContainer className="size-full min-h-24" config={proposalsChartConfig}>
-            <AreaChart
-              data={proposalsChartData}
-              margin={{
-                left: 0,
-                right: 0,
-                top: 5,
-              }}
-            >
-              <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} hide />
-              <ChartTooltip
-                content={<ChartTooltipContent labelFormatter={(label) => `${lastMonth}: ${label}`} hideIndicator />}
-              />
-              <Area
-                dataKey="proposalsSent"
-                fill="var(--color-proposalsSent)"
-                fillOpacity={0.05}
-                stroke="var(--color-proposalsSent)"
-                strokeWidth={2}
-                type="monotone"
-              />
-            </AreaChart>
-          </ChartContainer>
+          {(() => { const Chart = dynamic(() => import('./overview-proposals-chart'), { ssr: false }); return <Chart data={proposalsChartData} />; })()}
         </CardContent>
       </Card>
 
@@ -118,29 +83,7 @@ export function OverviewCards() {
           <CardDescription>Year to Date (YTD)</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={revenueChartConfig} className="h-24 w-full">
-            <LineChart
-              data={revenueChartData}
-              margin={{
-                top: 5,
-                right: 10,
-                left: 10,
-                bottom: 0,
-              }}
-            >
-              <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} hide />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                type="monotone"
-                strokeWidth={2}
-                dataKey="revenue"
-                stroke="var(--color-revenue)"
-                activeDot={{
-                  r: 6,
-                }}
-              />
-            </LineChart>
-          </ChartContainer>
+          {(() => { const Chart = dynamic(() => import('./overview-revenue-chart-small'), { ssr: false }); return <Chart data={revenueChartData} />; })()}
         </CardContent>
         <CardFooter>
           <p className="text-muted-foreground text-sm">+35% growth since last year</p>

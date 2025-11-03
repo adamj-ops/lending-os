@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { KYCService } from "@/services/kyc.service";
 import { PersonaAdapter, createPersonaAdapter } from "@/integrations/kyc/persona.adapter";
+import { withRequestLogging } from "@/lib/api-logger";
+import { created, notFound, badRequest, serverError } from "@/lib/api-response";
 
 /**
  * KYC Document Upload API
@@ -8,10 +10,10 @@ import { PersonaAdapter, createPersonaAdapter } from "@/integrations/kyc/persona
  * POST /api/v1/borrowers/:id/kyc/documents - Upload documents
  */
 
-export async function POST(
+export const POST = withRequestLogging(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   try {
     const { id: borrowerId } = await params;
     const formData = await request.formData();
@@ -20,21 +22,11 @@ export async function POST(
     const documentType = formData.get("documentType") as string;
     const file = formData.get("file") as File;
 
-    if (!verificationId || !documentType || !file) {
-      return NextResponse.json(
-        { error: "Missing required fields: verificationId, documentType, file" },
-        { status: 400 }
-      );
-    }
+    if (!verificationId || !documentType || !file) return badRequest("Missing required fields: verificationId, documentType, file");
 
     // Get verification
     const verification = await KYCService.getVerification(verificationId);
-    if (!verification || verification.borrowerId !== borrowerId) {
-      return NextResponse.json(
-        { error: "Verification not found" },
-        { status: 404 }
-      );
-    }
+    if (!verification || verification.borrowerId !== borrowerId) return notFound("Verification not found");
 
     // TODO: Upload file to S3 and get URL
     // For now, use placeholder
@@ -61,21 +53,10 @@ export async function POST(
       fileUrl,
     });
 
-    return NextResponse.json(
-      {
-        id: document.id,
-        documentType: document.documentType,
-        fileUrl: document.fileUrl,
-      },
-      { status: 201 }
-    );
+    return created({ id: document.id, documentType: document.documentType, fileUrl: document.fileUrl });
   } catch (error) {
     console.error("[KYC Documents API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to upload document" },
-      { status: 500 }
-    );
+    return serverError("Failed to upload document");
   }
-}
-
+});
 

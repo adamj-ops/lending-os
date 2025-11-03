@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KYCService } from "@/services/kyc.service";
+import { withRequestLogging } from "@/lib/api-logger";
+import { ok, badRequest, unauthorized, serverError } from "@/lib/api-response";
+import { verifyHmac } from "@/lib/webhook-signature";
 
 /**
  * Persona Webhook Handler
@@ -8,16 +11,19 @@ import { KYCService } from "@/services/kyc.service";
  * Publishes events to EventBus for downstream processing.
  */
 
-export async function POST(request: NextRequest) {
+export const POST = withRequestLogging(async (request: NextRequest) => {
   try {
-    const payload = await request.json();
+    const raw = await request.text();
+    const payload = JSON.parse(raw);
 
     // Verify webhook signature (Persona provides HMAC signature)
     // TODO: Implement signature verification
-    // const signature = request.headers.get("X-Persona-Signature");
-    // if (!verifySignature(payload, signature)) {
-    //   return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    // }
+    const personaSecret = process.env.PERSONA_WEBHOOK_SECRET;
+    const signature = request.headers.get("x-persona-signature") || request.headers.get("X-Persona-Signature");
+    if (personaSecret && signature) {
+      const valid = verifyHmac({ secret: personaSecret, payload: raw, signature });
+      if (!valid) return unauthorized("Invalid signature");
+    }
 
     // Parse Persona webhook payload
     // Persona sends webhooks in format:
@@ -41,12 +47,7 @@ export async function POST(request: NextRequest) {
     const eventName = payload.data?.attributes?.name || payload.event;
     const inquiryId = payload.data?.attributes?.payload?.data?.id || payload.inquiryId;
 
-    if (!inquiryId) {
-      return NextResponse.json(
-        { error: "Missing inquiryId" },
-        { status: 400 }
-      );
-    }
+    if (!inquiryId) return badRequest("Missing inquiryId");
 
     // Map Persona events to our internal events
     const eventMap: Record<string, string> = {
@@ -66,19 +67,12 @@ export async function POST(request: NextRequest) {
     );
 
     // Return success to Persona
-    return NextResponse.json({ status: "success" }, { status: 200 });
+    return ok({ status: "success" });
   } catch (error) {
     console.error("[Persona Webhook] Error:", error);
-    return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
-    );
+    return serverError("Webhook processing failed");
   }
-}
+});
 
 // GET endpoint for webhook verification
-export async function GET(request: NextRequest) {
-  return NextResponse.json({ status: "ok" }, { status: 200 });
-}
-
-
+export const GET = withRequestLogging(async (request: NextRequest) => NextResponse.json({ status: "ok" }, { status: 200 }));

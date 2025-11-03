@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import FullCalendar from "@fullcalendar/react";
+import dynamic from "next/dynamic";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -218,45 +218,52 @@ export function PaymentDrawCalendar({
       <Card>
         <CardContent className="p-0">
           <div className="w-full">
-            <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView={view}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: ''
-            }}
-            eventSources={eventSources}
-            eventClick={handleEventClick}
-            select={handleDateSelect}
-            eventDrop={handleEventDrop}
-            eventContent={getEventContent}
-            height="auto"
-            dayMaxEvents={3}
-            moreLinkClick="popover"
-            eventDisplay="block"
-            selectable={true}
-            selectMirror={true}
-            editable={true}
-            droppable={true}
-            eventResizableFromStart={true}
-            eventDurationEditable={true}
-            eventStartEditable={true}
-            weekends={true}
-            nowIndicator={true}
-            businessHours={{
-              daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
-              startTime: '09:00',
-              endTime: '17:00'
-            }}
-            slotMinTime="06:00:00"
-            slotMaxTime="22:00:00"
-            allDaySlot={true}
-            slotDuration="01:00:00"
-            slotLabelInterval="01:00:00"
-            expandRows={true}
-            aspectRatio={1.8}
+            {/* Lazy-load heavy FullCalendar component on client only */}
+            {/** Using next/dynamic keeps SSR bundle light and avoids hydration warnings */}
+            {(() => {
+              const FullCalendar = dynamic(() => import("@fullcalendar/react"), { ssr: false }) as any;
+              return (
+                <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              initialView={view}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+              }}
+              eventSources={eventSources}
+              eventClick={handleEventClick}
+              select={handleDateSelect}
+              eventDrop={handleEventDrop}
+              eventContent={getEventContent}
+              height="auto"
+              dayMaxEvents={3}
+              moreLinkClick="popover"
+              eventDisplay="block"
+              selectable={true}
+              selectMirror={true}
+              editable={true}
+              droppable={true}
+              eventResizableFromStart={true}
+              eventDurationEditable={true}
+              eventStartEditable={true}
+              weekends={true}
+              nowIndicator={true}
+              businessHours={{
+                daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+                startTime: '09:00',
+                endTime: '17:00'
+              }}
+              slotMinTime="06:00:00"
+              slotMaxTime="22:00:00"
+              allDaySlot={true}
+              slotDuration="01:00:00"
+              slotLabelInterval="01:00:00"
+              expandRows={true}
+              aspectRatio={1.8}
           />
+              );
+            })()}
           </div>
         </CardContent>
       </Card>

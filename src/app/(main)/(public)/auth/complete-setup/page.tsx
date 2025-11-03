@@ -62,7 +62,7 @@ export default function CompleteSetupPage() {
               variant="ghost"
               onClick={() => {
                 // Sign out and return to login
-                window.location.href = "/auth/v2/login";
+                window.location.href = "/auth/login";
               }}
             >
               Return to Login

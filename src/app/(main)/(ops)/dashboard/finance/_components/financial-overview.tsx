@@ -1,10 +1,10 @@
 "use client";
 
 import { IconArrowDownLeft, IconArrowUpRight, IconCalendarCheck } from "@tabler/icons-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import dynamic from "next/dynamic";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartConfig } from "@/components/ui/chart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils";
@@ -95,23 +95,10 @@ export function FinancialOverview() {
           </div>
         </div>
         <Separator />
-        <ChartContainer className="max-h-72 w-full" config={chartConfig}>
-          <BarChart margin={{ left: -25, right: 0, top: 25, bottom: 0 }} accessibilityLayer data={chartData}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => `${value >= 1000 ? value / 1000 + "k" : value}`}
-              domain={[0, 20000]}
-            />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="scheduled" stackId="a" fill={chartConfig.scheduled.color} />
-            <Bar dataKey="expenses" stackId="a" fill={chartConfig.expenses.color} />
-            <Bar dataKey="income" stackId="a" fill={chartConfig.income.color} />
-          </BarChart>
-        </ChartContainer>
+        {(() => {
+          const Chart = dynamic(() => import('./financial-overview-chart'), { ssr: false });
+          return <Chart data={chartData} config={chartConfig} />;
+        })()}
       </CardContent>
     </Card>
   );

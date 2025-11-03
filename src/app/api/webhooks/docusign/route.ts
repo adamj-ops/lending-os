@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignatureService } from "@/services/signature.service";
 import { DocuSignAdapter } from "@/integrations/signature/docusign.adapter";
+import { withRequestLogging } from "@/lib/api-logger";
+import { ok, badRequest, unauthorized, serverError } from "@/lib/api-response";
+import { verifyHmac } from "@/lib/webhook-signature";
 
 /**
  * DocuSign Webhook Handler
@@ -9,16 +12,19 @@ import { DocuSignAdapter } from "@/integrations/signature/docusign.adapter";
  * Publishes events to EventBus for downstream processing.
  */
 
-export async function POST(request: NextRequest) {
+export const POST = withRequestLogging(async (request: NextRequest) => {
   try {
-    const payload = await request.json();
+    const raw = await request.text();
+    const payload = JSON.parse(raw);
 
     // Verify webhook signature (DocuSign provides HMAC signature)
     // TODO: Implement signature verification
-    // const signature = request.headers.get("X-DocuSign-Signature");
-    // if (!verifySignature(payload, signature)) {
-    //   return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    // }
+    const dsSecret = process.env.DOCUSIGN_WEBHOOK_SECRET;
+    const signature = request.headers.get('x-docusign-signature-1') || request.headers.get('X-DocuSign-Signature-1');
+    if (dsSecret && signature) {
+      const valid = verifyHmac({ secret: dsSecret, payload: raw, signature });
+      if (!valid) return unauthorized('Invalid signature');
+    }
 
     // Parse DocuSign webhook payload
     // DocuSign sends webhooks in Connect format:
@@ -34,12 +40,7 @@ export async function POST(request: NextRequest) {
     const event = payload.event || payload.data?.event;
     const envelopeId = payload.data?.envelopeId || payload.envelopeId;
 
-    if (!envelopeId) {
-      return NextResponse.json(
-        { error: "Missing envelopeId" },
-        { status: 400 }
-      );
-    }
+    if (!envelopeId) return badRequest("Missing envelopeId");
 
     // Map DocuSign events to our internal events
     const eventMap: Record<string, string> = {
@@ -57,27 +58,17 @@ export async function POST(request: NextRequest) {
     await SignatureService.handleWebhook(envelopeId, mappedEvent, payload.data || payload);
 
     // Return success to DocuSign
-    return NextResponse.json({ status: "success" }, { status: 200 });
+    return ok({ status: "success" });
   } catch (error) {
     console.error("[DocuSign Webhook] Error:", error);
-    return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
-    );
+    return serverError("Webhook processing failed");
   }
-}
+});
 
 // GET endpoint for webhook verification (DocuSign Connect verification)
-export async function GET(request: NextRequest) {
+export const GET = withRequestLogging(async (request: NextRequest) => {
   const query = request.nextUrl.searchParams;
   const challenge = query.get("challenge");
-
-  // DocuSign Connect sends a challenge parameter for verification
-  if (challenge) {
-    return NextResponse.json({ challenge }, { status: 200 });
-  }
-
+  if (challenge) return NextResponse.json({ challenge }, { status: 200 });
   return NextResponse.json({ status: "ok" }, { status: 200 });
-}
-
-
+});

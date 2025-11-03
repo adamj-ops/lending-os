@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { KYCService } from "@/services/kyc.service";
 import { PersonaAdapter, createPersonaAdapter } from "@/integrations/kyc/persona.adapter";
 import { BorrowerService } from "@/services/borrower.service";
+import { withRequestLogging } from "@/lib/api-logger";
+import { ok, created, notFound, serverError, unprocessable } from "@/lib/api-response";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
 /**
  * KYC Operations API
@@ -9,29 +13,30 @@ import { BorrowerService } from "@/services/borrower.service";
  * POST /api/v1/borrowers/:id/kyc - Initiate verification
  */
 
-export async function POST(
+export const POST = withRequestLogging(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   try {
     const { id: borrowerId } = await params;
-    const body = await request.json();
+    const body = await parseJsonBody(
+      z.object({ userId: z.string().optional(), provider: z.enum(['persona']).optional() }),
+      request
+    );
+    if (!body.success) return unprocessable("Invalid request body", body.issues);
 
     // Get borrower to verify it exists and get organization
     const borrower = await BorrowerService.getBorrowerById(borrowerId);
     if (!borrower) {
-      return NextResponse.json(
-        { error: "Borrower not found" },
-        { status: 404 }
-      );
+      return notFound("Borrower not found");
     }
 
     // Create verification record
     const verification = await KYCService.initiateVerification({
       borrowerId,
-      userId: body.userId,
+      userId: body.data.userId,
       organizationId: borrower.organizationId,
-      provider: body.provider || "persona",
+      provider: body.data.provider || "persona",
     });
 
     // Get Persona adapter
@@ -53,21 +58,10 @@ export async function POST(
     // Update verification with provider ID
     await KYCService.updateVerificationId(verification.id, personaVerification.inquiryId);
 
-    return NextResponse.json(
-      {
-        id: verification.id,
-        verificationId: personaVerification.inquiryId,
-        status: verification.status,
-      },
-      { status: 201 }
-    );
+    return created({ id: verification.id, verificationId: personaVerification.inquiryId, status: verification.status });
   } catch (error) {
     console.error("[KYC API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to initiate KYC verification" },
-      { status: 500 }
-    );
+    return serverError("Failed to initiate KYC verification");
   }
-}
-
+});
 
