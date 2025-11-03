@@ -152,7 +152,7 @@ export function InspectionsAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{completionRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-brand-primary-600">{completionRate.toFixed(1)}%</div>
             <Progress value={completionRate} className="mt-2" />
           </CardContent>
         </Card>

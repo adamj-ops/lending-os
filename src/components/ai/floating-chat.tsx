@@ -128,7 +128,7 @@ export function FloatingAIChat({ className }: FloatingAIChatProps) {
       <div className={cn("fixed bottom-6 right-6 z-50", className)}>
         <Button
           onClick={() => setIsOpen(true)}
-          className="rounded-full w-14 h-14 bg-blue-600 hover:bg-blue-700 shadow-lg"
+          className="rounded-full w-14 h-14 bg-brand-primary-600 hover:bg-brand-primary-700 shadow-lg"
         >
           <IconMessageCircle size={20} stroke={2} className="h-6 w-6" />
         </Button>
@@ -150,7 +150,7 @@ export function FloatingAIChat({ className }: FloatingAIChatProps) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-sm">
-              <IconRobot size={16} stroke={2} className="h-4 w-4 text-blue-600" />
+              <IconRobot size={16} stroke={2} className="h-4 w-4 text-brand-primary-600" />
               AI Assistant
             </CardTitle>
             <div className="flex items-center gap-1">
@@ -191,7 +191,7 @@ export function FloatingAIChat({ className }: FloatingAIChatProps) {
                       className={cn(
                         "max-w-xs p-2 rounded-lg text-xs",
                         message.role === 'user'
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-brand-primary-600 text-white'
                           : 'bg-gray-100 text-gray-800'
                       )}
                     >
@@ -353,7 +353,7 @@ export function ContextualAIChat({ context, className }: ContextualAIChatProps) 
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <IconRobot size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+                  <IconRobot size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
                   Contextual AI Assistant
                 </CardTitle>
                 <Button
@@ -368,7 +368,7 @@ export function ContextualAIChat({ context, className }: ContextualAIChatProps) 
             <CardContent>
               <div className="space-y-4">
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">{getContextualPrompt()}</p>
+                  <p className="text-sm text-brand-primary-800">{getContextualPrompt()}</p>
                 </div>
                 
                 <div className="h-48 overflow-y-auto space-y-2">
@@ -378,7 +378,7 @@ export function ContextualAIChat({ context, className }: ContextualAIChatProps) 
                       className={cn(
                         "p-2 rounded text-sm",
                         message.role === 'user'
-                          ? 'bg-blue-100 text-blue-800 ml-4'
+                          ? 'bg-brand-primary-100 text-brand-primary-800 ml-4'
                           : 'bg-gray-100 text-gray-800 mr-4'
                       )}
                     >

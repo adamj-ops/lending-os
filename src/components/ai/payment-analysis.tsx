@@ -125,14 +125,14 @@ export function AIPaymentAnalysis({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Payment Analysis
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-brand-primary-600 mx-auto mb-4" />
               <p className="text-brand-muted">Analyzing payment patterns...</p>
             </div>
           </div>
@@ -146,7 +146,7 @@ export function AIPaymentAnalysis({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Payment Analysis
           </CardTitle>
         </CardHeader>
@@ -168,7 +168,7 @@ export function AIPaymentAnalysis({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Payment Analysis
           </CardTitle>
         </CardHeader>
@@ -191,7 +191,7 @@ export function AIPaymentAnalysis({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Payment Analysis
           </CardTitle>
         </CardHeader>
@@ -217,9 +217,9 @@ export function AIPaymentAnalysis({
             <h4 className="font-medium mb-2">Key Insights</h4>
             <div className="space-y-2">
               {analysis.insights.map((insight, index) => (
-                <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
-                  <IconCircleCheck size={20} stroke={2} className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-blue-800">{insight}</p>
+                <div key={index} className="flex items-start gap-2 p-2 bg-brand-primary-50 rounded-lg dark:bg-brand-primary-950">
+                  <IconCircleCheck size={20} stroke={2} className="h-4 w-4 text-brand-primary-600 dark:text-brand-primary-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-brand-primary-800 dark:text-brand-primary-300">{insight}</p>
                 </div>
               ))}
             </div>
@@ -246,7 +246,7 @@ export function AIPaymentAnalysis({
             
             <div className="text-center p-4 border rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4 text-blue-600" />
+                <IconCurrencyDollar size={20} stroke={2} className="h-4 w-4 text-brand-primary-600" />
                 <span className="font-medium">Amount</span>
               </div>
               <p className="text-sm text-brand-muted capitalize">
@@ -412,7 +412,7 @@ export function AIPaymentChat({ loanId, payments, className }: AIPaymentChatProp
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <IconRobot size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+          <IconRobot size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
           Payment AI Assistant
         </CardTitle>
       </CardHeader>
@@ -438,7 +438,7 @@ export function AIPaymentChat({ loanId, payments, className }: AIPaymentChatProp
                     className={cn(
                       "max-w-xs p-3 rounded-lg text-sm",
                       message.role === 'user'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-brand-primary-600 text-white'
                         : 'bg-gray-100 text-gray-800'
                     )}
                   >

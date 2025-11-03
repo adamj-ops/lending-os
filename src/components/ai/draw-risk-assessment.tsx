@@ -126,7 +126,7 @@ export function AIDrawRiskAssessment({
       case 'approve': return <IconCircleCheck size={20} stroke={2} className="h-5 w-5 text-brand-success" />;
       case 'approve_with_conditions': return <IconAlertTriangle size={20} stroke={2} className="h-5 w-5 text-brand-accent" />;
       case 'reject': return <IconAlertTriangle size={20} stroke={2} className="h-5 w-5 text-brand-danger" />;
-      case 'request_more_info': return <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />;
+      case 'request_more_info': return <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />;
       default: return <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-muted" />;
     }
   };
@@ -136,14 +136,14 @@ export function AIDrawRiskAssessment({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Draw Risk Assessment
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-brand-primary-600 mx-auto mb-4" />
               <p className="text-brand-muted">Assessing draw risk factors...</p>
             </div>
           </div>
@@ -157,7 +157,7 @@ export function AIDrawRiskAssessment({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Draw Risk Assessment
           </CardTitle>
         </CardHeader>
@@ -179,7 +179,7 @@ export function AIDrawRiskAssessment({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Draw Risk Assessment
           </CardTitle>
         </CardHeader>
@@ -202,7 +202,7 @@ export function AIDrawRiskAssessment({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Draw Risk Assessment
           </CardTitle>
         </CardHeader>
@@ -264,7 +264,7 @@ export function AIDrawRiskAssessment({
                   </div>
                 </div>
                 <p className="text-sm text-brand-muted mb-2">{factor.description}</p>
-                <div className="p-2 bg-blue-50 rounded text-sm text-blue-800">
+                <div className="p-2 bg-brand-primary-50 rounded text-sm text-brand-primary-800 dark:bg-brand-primary-950 dark:text-brand-primary-300">
                   <strong>Mitigation:</strong> {factor.mitigation}
                 </div>
               </div>
@@ -430,7 +430,7 @@ export function AIDrawAnalysisSummary({ draws, className }: AIDrawAnalysisSummar
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+          <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
           Draw Analysis Summary
         </CardTitle>
       </CardHeader>
@@ -438,7 +438,7 @@ export function AIDrawAnalysisSummary({ draws, className }: AIDrawAnalysisSummar
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">{summary.totalDraws}</div>
+              <div className="text-2xl font-bold text-brand-primary-600">{summary.totalDraws}</div>
               <div className="text-sm text-brand-muted">Total Draws</div>
             </div>
             <div>
@@ -450,10 +450,10 @@ export function AIDrawAnalysisSummary({ draws, className }: AIDrawAnalysisSummar
               <div className="text-sm text-brand-muted">Rejected</div>
             </div>
           </div>
-          
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-1">Key Insights</h4>
-            <p className="text-sm text-blue-700">{summary.insights}</p>
+
+          <div className="p-3 bg-brand-primary-50 rounded-lg dark:bg-brand-primary-950">
+            <h4 className="font-medium text-brand-primary-800 dark:text-brand-primary-200 mb-1">Key Insights</h4>
+            <p className="text-sm text-brand-primary-700 dark:text-brand-primary-300">{summary.insights}</p>
           </div>
           
           <div className="p-3 bg-green-50 rounded-lg">

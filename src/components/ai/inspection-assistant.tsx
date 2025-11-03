@@ -101,7 +101,7 @@ export function AIInspectionAssistant({
     switch (category) {
       case 'safety': return <IconAlertTriangle size={20} stroke={2} className="h-4 w-4 text-brand-danger" />;
       case 'quality': return <IconCircleCheck size={20} stroke={2} className="h-4 w-4 text-brand-success" />;
-      case 'compliance': return <IconFileText size={20} stroke={2} className="h-4 w-4 text-blue-600" />;
+      case 'compliance': return <IconFileText size={20} stroke={2} className="h-4 w-4 text-brand-primary-600" />;
       case 'progress': return <IconMapPin size={20} stroke={2} className="h-4 w-4 text-brand-accent" />;
       default: return <IconBulb size={16} stroke={2} className="h-4 w-4 text-brand-muted" />;
     }
@@ -109,19 +109,19 @@ export function AIInspectionAssistant({
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'safety': return 'bg-red-100 text-red-800';
-      case 'quality': return 'bg-green-100 text-green-800';
-      case 'compliance': return 'bg-blue-100 text-blue-800';
-      case 'progress': return 'bg-yellow-100 text-yellow-800';
+      case 'safety': return 'bg-brand-danger-50 text-brand-danger-800 dark:bg-brand-danger-950 dark:text-brand-danger-400';
+      case 'quality': return 'bg-brand-success-50 text-brand-success-800 dark:bg-brand-success-950 dark:text-brand-success-400';
+      case 'compliance': return 'bg-brand-primary-50 text-brand-primary-800 dark:bg-brand-primary-950 dark:text-brand-primary-400';
+      case 'progress': return 'bg-brand-accent-50 text-brand-accent-800 dark:bg-brand-accent-950 dark:text-brand-accent-400';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
+      case 'high': return 'bg-brand-danger-50 text-brand-danger-800 dark:bg-brand-danger-950 dark:text-brand-danger-400';
+      case 'medium': return 'bg-brand-accent-50 text-brand-accent-800 dark:bg-brand-accent-950 dark:text-brand-accent-400';
+      case 'low': return 'bg-brand-success-50 text-brand-success-800 dark:bg-brand-success-950 dark:text-brand-success-400';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -140,14 +140,14 @@ export function AIInspectionAssistant({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Inspection Assistant
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+              <IconLoader2 size={20} stroke={2} className="h-8 w-8 animate-spin text-brand-primary-600 mx-auto mb-4" />
               <p className="text-brand-muted">Analyzing inspection data...</p>
             </div>
           </div>
@@ -161,7 +161,7 @@ export function AIInspectionAssistant({
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+            <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
             AI Inspection Assistant
           </CardTitle>
         </CardHeader>
@@ -182,7 +182,7 @@ export function AIInspectionAssistant({
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <IconBrain size={20} stroke={2} className="h-5 w-5 text-blue-600" />
+          <IconBrain size={20} stroke={2} className="h-5 w-5 text-brand-primary-600" />
           AI Inspection Assistant
         </CardTitle>
         <div className="flex gap-2">
@@ -236,10 +236,10 @@ export function AIInspectionAssistant({
                   </div>
                   
                   <p className="text-sm text-brand-muted mb-3">{rec.description}</p>
-                  
-                  <div className="p-3 bg-blue-50 rounded-lg mb-3">
-                    <h5 className="font-medium text-blue-800 mb-1">Recommended Action</h5>
-                    <p className="text-sm text-blue-700">{rec.action}</p>
+
+                  <div className="p-3 bg-brand-primary-50 rounded-lg mb-3 dark:bg-brand-primary-950">
+                    <h5 className="font-medium text-brand-primary-800 dark:text-brand-primary-200 mb-1">Recommended Action</h5>
+                    <p className="text-sm text-brand-primary-700 dark:text-brand-primary-300">{rec.action}</p>
                   </div>
 
                   {rec.checklistItems && rec.checklistItems.length > 0 && (
@@ -388,7 +388,7 @@ function AIChatAssistant({ inspection, photos, checklist }: AIChatAssistantProps
                 className={cn(
                   "max-w-xs p-3 rounded-lg text-sm",
                   message.role === 'user'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand-primary-600 text-white'
                     : 'bg-gray-100 text-gray-800'
                 )}
               >

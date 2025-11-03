@@ -9,9 +9,9 @@ const cards = [
     value: '$956.82k',
     valueColor: 'text-brand-success',
     badge: {
-      color: 'bg-green-100 text-brand-success dark:bg-green-950 dark:text-green-400',
+      color: 'bg-brand-success-100 text-brand-success-700 dark:bg-brand-success-950 dark:text-brand-success-400',
       icon: IconArrowUpRight,
-      iconColor: 'text-green-500',
+      iconColor: 'text-brand-success-500',
       text: '+5.4%',
     },
     subtext: (
@@ -24,15 +24,15 @@ const cards = [
     title: 'New Customers',
     subtitle: 'This quarter',
     value: '1,245',
-    valueColor: 'text-blue-600',
+    valueColor: 'text-brand-primary-600',
     badge: {
-      color: 'bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+      color: 'bg-brand-primary-100 text-brand-primary-700 dark:bg-brand-primary-950 dark:text-brand-primary-400',
       icon: IconUserPlus,
-      iconColor: 'text-blue-500',
+      iconColor: 'text-brand-primary-500',
       text: '+3.2%',
     },
     subtext: (
-      <span className="text-blue-600 font-medium">
+      <span className="text-brand-primary-600 font-medium">
         +39 <span className="text-muted-foreground font-normal">vs last quarter</span>
       </span>
     ),
@@ -43,9 +43,9 @@ const cards = [
     value: '2.8%',
     valueColor: 'text-brand-danger',
     badge: {
-      color: 'bg-red-100 text-brand-danger dark:bg-red-950 dark:text-red-400',
+      color: 'bg-brand-danger-100 text-brand-danger-700 dark:bg-brand-danger-950 dark:text-brand-danger-400',
       icon: IconTrendingDown,
-      iconColor: 'text-brand-danger',
+      iconColor: 'text-brand-danger-500',
       text: '-1.1%',
     },
     subtext: (

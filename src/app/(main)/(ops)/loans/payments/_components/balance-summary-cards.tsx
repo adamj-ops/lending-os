@@ -141,17 +141,17 @@ export function BalanceSummaryCards({
           </p>
           <div className="mt-2 flex flex-wrap gap-1">
             {balance.paymentsLate > 0 && (
-              <Badge variant="secondary" className="bg-orange-500/10 text-orange-700">
+              <Badge variant="secondary" className="bg-brand-accent-50 text-brand-accent-700 dark:bg-brand-accent-950 dark:text-brand-accent-400">
                 {balance.paymentsLate} late
               </Badge>
             )}
             {balance.paymentsMissed > 0 && (
-              <Badge variant="secondary" className="bg-brand-danger/10 text-red-700">
+              <Badge variant="secondary" className="bg-brand-danger-50 text-brand-danger-700 dark:bg-brand-danger-950 dark:text-brand-danger-400">
                 {balance.paymentsMissed} missed
               </Badge>
             )}
             {balance.isDelinquent && (
-              <Badge variant="secondary" className="bg-brand-danger/10 text-red-700">
+              <Badge variant="secondary" className="bg-brand-danger-50 text-brand-danger-700 dark:bg-brand-danger-950 dark:text-brand-danger-400">
                 Delinquent
               </Badge>
             )}
@@ -192,8 +192,8 @@ export function BalanceSummaryCards({
                     </>
                   ) : balance.daysUntilNextPayment <= 7 ? (
                     <>
-                      <IconAlertCircle size={20} stroke={2} className="h-4 w-4 text-orange-600" />
-                      <span className="text-sm font-medium text-orange-600">
+                      <IconAlertCircle size={20} stroke={2} className="h-4 w-4 text-brand-accent-600" />
+                      <span className="text-sm font-medium text-brand-accent-600">
                         Due in {balance.daysUntilNextPayment} days
                       </span>
                     </>

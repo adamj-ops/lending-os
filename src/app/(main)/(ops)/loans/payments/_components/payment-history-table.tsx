@@ -61,9 +61,9 @@ interface PaymentHistoryTableProps {
 }
 
 const paymentStatusColors = {
-  pending: "bg-brand-accent/10 text-yellow-700 hover:bg-brand-accent/20",
-  processed: "bg-green-500/10 text-green-700 hover:bg-green-500/20",
-  failed: "bg-brand-danger/10 text-red-700 hover:bg-brand-danger/20",
+  pending: "bg-brand-accent-50 text-brand-accent-700 hover:bg-brand-accent-100 dark:bg-brand-accent-950 dark:text-brand-accent-400",
+  processed: "bg-brand-success-50 text-brand-success-700 hover:bg-brand-success-100 dark:bg-brand-success-950 dark:text-brand-success-400",
+  failed: "bg-brand-danger-50 text-brand-danger-700 hover:bg-brand-danger-100 dark:bg-brand-danger-950 dark:text-brand-danger-400",
   reversed: "bg-gray-500/10 text-gray-700 hover:bg-gray-500/20",
 };
 

@@ -70,7 +70,7 @@ const barInsights = [
 function GrowthBadge({ direction, growth }: { direction: string; growth: number }) {
   if (direction === 'up')
     return (
-      <Badge className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+      <Badge className="bg-brand-primary-100 text-brand-primary-700 dark:bg-brand-primary-950 dark:text-brand-primary-400 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
         <IconArrowUpRight size={20} stroke={2} className="w-3 h-3" />+{growth}%
       </Badge>
     );
@@ -85,14 +85,14 @@ function GrowthBadge({ direction, growth }: { direction: string; growth: number 
 function getBarColor(direction: string, j: number, height: number) {
   if (height === 0) return 'bg-muted';
 
-  // Even color progression from intense to neutral
+  // Even color progression from intense to subtle using Colosseum shade system
   const barColors = [
-    'bg-brand-primary',
-    'bg-brand-primary',
-    'bg-indigo-400',
-    'bg-indigo-300',
-    'bg-indigo-200',
-    'bg-indigo-100',
+    'bg-brand-primary-500',
+    'bg-brand-primary-500',
+    'bg-brand-primary-400',
+    'bg-brand-primary-300',
+    'bg-brand-primary-200',
+    'bg-brand-primary-100',
   ];
   return j < height ? barColors[j] : 'bg-muted';
 }

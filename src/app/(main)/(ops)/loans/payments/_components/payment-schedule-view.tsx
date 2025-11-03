@@ -42,10 +42,10 @@ interface PaymentScheduleViewProps {
 }
 
 const statusColors = {
-  scheduled: "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20",
-  paid: "bg-green-500/10 text-green-700 hover:bg-green-500/20",
-  late: "bg-orange-500/10 text-orange-700 hover:bg-orange-500/20",
-  missed: "bg-brand-danger/10 text-red-700 hover:bg-brand-danger/20",
+  scheduled: "bg-brand-primary-50 text-brand-primary-700 hover:bg-brand-primary-100 dark:bg-brand-primary-950 dark:text-brand-primary-400",
+  paid: "bg-brand-success-50 text-brand-success-700 hover:bg-brand-success-100 dark:bg-brand-success-950 dark:text-brand-success-400",
+  late: "bg-brand-accent-50 text-brand-accent-700 hover:bg-brand-accent-100 dark:bg-brand-accent-950 dark:text-brand-accent-400",
+  missed: "bg-brand-danger-50 text-brand-danger-700 hover:bg-brand-danger-100 dark:bg-brand-danger-950 dark:text-brand-danger-400",
 };
 
 export function PaymentScheduleView({

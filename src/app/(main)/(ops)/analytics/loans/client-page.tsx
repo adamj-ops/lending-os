@@ -186,11 +186,11 @@ export function LoansAnalyticsClient() {
                 <p className="text-sm text-muted-foreground">Performing Rate</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">5.8%</p>
+                <p className="text-2xl font-bold text-brand-danger-600">5.8%</p>
                 <p className="text-sm text-muted-foreground">Delinquency Rate</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-brand-primary-600">
                   ${data?.kpis?.interestAccrued ? parseFloat(data.kpis.interestAccrued).toLocaleString() : '0'}
                 </p>
                 <p className="text-sm text-muted-foreground">Interest Accrued</p>
@@ -210,21 +210,21 @@ export function LoansAnalyticsClient() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950">
-              <h4 className="font-semibold text-green-900 dark:text-green-100">Portfolio Health</h4>
-              <p className="text-sm text-green-700 dark:text-green-300">
+            <div className="p-4 border rounded-lg bg-brand-success-50 dark:bg-brand-success-950">
+              <h4 className="font-semibold text-brand-success-900 dark:text-brand-success-100">Portfolio Health</h4>
+              <p className="text-sm text-brand-success-700 dark:text-brand-success-300">
                 Your loan portfolio shows excellent health with 94.2% performing rate, well above industry average.
               </p>
             </div>
-            <div className="p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-950">
-              <h4 className="font-semibold text-yellow-900 dark:text-yellow-100">LTV Monitoring</h4>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+            <div className="p-4 border rounded-lg bg-brand-accent-50 dark:bg-brand-accent-950">
+              <h4 className="font-semibold text-brand-accent-900 dark:text-brand-accent-100">LTV Monitoring</h4>
+              <p className="text-sm text-brand-accent-700 dark:text-brand-accent-300">
                 Average LTV of {data?.kpis?.avgLtv ? `${parseFloat(data.kpis.avgLtv).toFixed(1)}%` : 'N/A'} is within acceptable range. Monitor for any significant increases.
               </p>
             </div>
-            <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100">Growth Opportunity</h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="p-4 border rounded-lg bg-brand-primary-50 dark:bg-brand-primary-950">
+              <h4 className="font-semibold text-brand-primary-900 dark:text-brand-primary-100">Growth Opportunity</h4>
+              <p className="text-sm text-brand-primary-700 dark:text-brand-primary-300">
                 Consider expanding portfolio in high-performing segments to capitalize on current market conditions.
               </p>
             </div>
