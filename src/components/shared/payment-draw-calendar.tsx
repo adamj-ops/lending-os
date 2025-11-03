@@ -310,8 +310,9 @@ export function EventDetailsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 z-40 bg-black/90 backdrop-blur-md" />
+      <Card className="relative z-50 w-full max-w-md mx-4">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
