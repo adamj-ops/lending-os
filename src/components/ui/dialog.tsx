@@ -27,7 +27,7 @@ function DialogBackdrop({
     <DialogPrimitive.Backdrop
       data-slot="dialog-backdrop"
       className={cn(
-        "fixed inset-0 z-40 bg-black/90 backdrop-blur-md transition-all duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0",
+        "fixed inset-0 z-50 bg-black/90 backdrop-blur-md transition-all duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0",
         className
       )}
       {...props}
@@ -46,7 +46,7 @@ function DialogPopup({
   return (
     <DialogPortal>
       <DialogBackdrop />
-      <div className="fixed inset-0 z-50">
+      <div className="fixed inset-0 z-[60]">
         <div className="flex h-[100dvh] flex-col items-center overflow-hidden pt-6 max-sm:before:flex-1 sm:overflow-y-auto sm:p-4 sm:before:basis-[20vh] sm:after:flex-1">
           <DialogPrimitive.Popup
             data-slot="dialog-popup"
